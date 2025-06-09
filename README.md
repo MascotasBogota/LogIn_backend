@@ -1,6 +1,6 @@
 # 🐾 Mascotas App - Backend
 
-![CI Tests](https://github.com/TU_USUARIO/TU_REPOSITORIO/workflows/CI%20Tests/badge.svg)
+![CI Tests](https://github.com/MascotasBogota/LogIn_backend/workflows/CI%20Tests/badge.svg)
 ![Python](https://img.shields.io/badge/python-3.9%2B-blue.svg)
 ![Flask](https://img.shields.io/badge/flask-3.0.0-green.svg)
 
