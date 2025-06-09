@@ -1,6 +1,6 @@
 # Flask y extensiones
 Flask==3.0.0
-Flask-CORS==4.0.0
+Flask-CORS==6.0.0
 Flask-PyMongo==2.3.0
 
 # Base de datos
