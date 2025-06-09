@@ -146,4 +146,4 @@ Este proyecto está bajo la Licencia MIT.
 
 ## 👨‍💻 Autor
 
-Tu nombre - [@tu_usuario](https://github.com/tu_usuario)
+David Alejandro Cifuentes Gonzalez - [@dcifuentesg](https://github.com/dcifuentesg)
