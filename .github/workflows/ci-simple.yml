@@ -1,4 +1,4 @@
-name: CI Tests
+name: CI Tests Simple
 
 on:
   push:
@@ -9,11 +9,13 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-      strategy:
+    
+    strategy:
       matrix:
         python-version: ["3.9", "3.10", "3.11"]
     
-    steps:    - name: Checkout code
+    steps:
+    - name: Checkout code
       uses: actions/checkout@v4
     
     - name: Set up Python ${{ matrix.python-version }}
@@ -21,49 +23,42 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
     
-    - name: Cache pip dependencies
-      uses: actions/cache@v4
-      with:
-        path: ~/.cache/pip
-        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
-        restore-keys: |
-          ${{ runner.os }}-pip-
-    
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
-        pip install pytest pytest-asyncio
     
-    - name: Set environment variables
+    - name: Set environment variables for testing
       run: |
         echo "MONGO_URI=mongodb://localhost:27017/test-db" >> $GITHUB_ENV
         echo "JWT_SECRET=test-secret-key-for-github-actions" >> $GITHUB_ENV
         echo "FLASK_ENV=testing" >> $GITHUB_ENV
-      - name: Start MongoDB
+    
+    - name: Start MongoDB
       uses: supercharge/mongodb-github-action@1.10.0
       with:
         mongodb-version: '6.0'
-        mongodb-port: 27017
     
-    - name: Wait for MongoDB
+    - name: Wait for MongoDB to be ready
       run: |
-        sleep 5
-        # Verificar que MongoDB esté corriendo
-        timeout 30 bash -c 'until nc -z localhost 27017; do sleep 1; done'
+        sleep 10
+        # Verificar conexión con timeout
+        timeout 30 bash -c 'until nc -z localhost 27017; do echo "Waiting for MongoDB..."; sleep 2; done'
+        echo "MongoDB is ready!"
     
     - name: Run tests
       run: |
         python -m pytest -v --tb=short
     
-    - name: Generate test coverage
+    - name: Run tests with coverage (Python 3.11 only)
+      if: matrix.python-version == '3.11'
       run: |
         pip install pytest-cov
-        python -m pytest --cov=. --cov-report=xml --cov-report=html
+        python -m pytest --cov=. --cov-report=xml --cov-report=term-missing
     
-    - name: Upload coverage to Codecov
+    - name: Upload coverage reports to Codecov (Python 3.11 only)
       if: matrix.python-version == '3.11'
-      uses: codecov/codecov-action@v3
+      uses: codecov/codecov-action@v4
       with:
         file: ./coverage.xml
         flags: unittests

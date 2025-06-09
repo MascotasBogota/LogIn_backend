@@ -24,7 +24,7 @@ Backend API para la aplicación de mascotas desarrollada con Flask y MongoDB.
 
 1. **Clonar el repositorio:**
 ```bash
-git clone https://github.com/TU_USUARIO/TU_REPOSITORIO.git
+git clone https://github.com/MascotasBogota/LogIn_backend.git
 cd LogIn_backend
 ```
 
