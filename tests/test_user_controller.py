@@ -40,14 +40,14 @@ class TestUserController:
             'email': 'test@example.com',
             'password': 'Password123'
         }
-        
-        # Mock del modelo User y handlers
+          # Mock del modelo User y handlers
         with patch('controllers.user_controller.User') as mock_user_class, \
-             patch('controllers.user_controller.user_creation_chain') as mock_chain:
-            
-            # Mock del handler chain
+             patch('controllers.user_controller.create_user_validation_chain') as mock_chain:
+              # Mock del handler chain
             mock_handler = Mock()
-            mock_handler.handle.return_value = True
+            async def mock_handle(context, response_handler):
+                return True
+            mock_handler.handle = mock_handle
             mock_chain.return_value = mock_handler
             
             # Mock del modelo User
@@ -66,8 +66,7 @@ class TestUserController:
             
             # Verificar
             assert status_code == 201
-            assert 'fullName' in result or 'message' in result
-    @pytest.mark.skipif(not IMPORT_SUCCESS, reason="No se pudo importar UserController")
+            assert 'fullName' in result or 'message' in result    @pytest.mark.skipif(not IMPORT_SUCCESS, reason="No se pudo importar UserController")
     def test_login_user_success(self):
         """Test login exitoso"""
         # Datos de prueba
@@ -76,34 +75,38 @@ class TestUserController:
             'password': 'Password123'
         }
         
-        # Mock del modelo User
-        with patch('controllers.user_controller.User') as mock_user_class:
-            mock_user = Mock()
-            mock_user._id = 'mock_user_id'
-            mock_user.password = '$2b$12$hash'  # Hash mock
-            mock_user.to_dict.return_value = {
-                '_id': 'mock_user_id',
-                'fullName': 'Test User',
-                'email': 'test@example.com'
-            }
-            mock_user_class.find_by_email.return_value = mock_user
-            
-            # Mock bcrypt
-            with patch('controllers.user_controller.bcrypt') as mock_bcrypt:
-                mock_bcrypt.checkpw.return_value = True
+        # Crear contexto de aplicación Flask para el test
+        from flask import Flask
+        test_app = Flask(__name__)
+        test_app.config['SECRET_KEY'] = 'test_secret'
+        
+        with test_app.app_context():
+            # Mock del modelo User
+            with patch('controllers.user_controller.User') as mock_user_class:
+                mock_user = Mock()
+                mock_user._id = 'mock_user_id'
+                mock_user.password = '$2b$12$hash'  # Hash mock
+                mock_user.to_dict.return_value = {
+                    '_id': 'mock_user_id',
+                    'fullName': 'Test User',
+                    'email': 'test@example.com'
+                }
+                mock_user_class.find_by_email.return_value = mock_user
                 
-                # Mock jwt y current_app
-                with patch('controllers.user_controller.jwt') as mock_jwt, \
-                     patch('controllers.user_controller.current_app') as mock_app:
-                    mock_jwt.encode.return_value = b'mock_token'  # jwt devuelve bytes
-                    mock_app.config = {'SECRET_KEY': 'test_secret'}
+                # Mock bcrypt
+                with patch('controllers.user_controller.bcrypt') as mock_bcrypt:
+                    mock_bcrypt.checkpw.return_value = True
                     
-                    # Ejecutar
-                    result, status_code = UserController.login_user(request_data)
-                    
-                    # Verificar
-                    assert status_code == 200
-                    assert 'token' in result or 'message' in result
+                    # Mock jwt
+                    with patch('controllers.user_controller.jwt') as mock_jwt:
+                        mock_jwt.encode.return_value = b'mock_token'  # jwt devuelve bytes
+                        
+                        # Ejecutar
+                        result, status_code = UserController.login_user(request_data)
+                        
+                        # Verificar
+                        assert status_code == 200
+                        assert 'token' in result or 'message' in result
     
     @pytest.mark.skipif(not IMPORT_SUCCESS, reason="No se pudo importar UserController")
     def test_login_user_invalid_credentials(self):
