@@ -9,6 +9,7 @@ import os
 from config.database import init_db
 from routes.user_routes import user_bp
 from routes.password_reset_routes import password_reset_bp
+from routes.profile_routes import profile_bp
 
 # Cargar variables de entorno
 load_dotenv()
@@ -25,10 +26,10 @@ def create_app():
     CORS(app, origins=['http://localhost:5173', 'http://localhost:3000'])
     
     # Inicializar base de datos
-    init_db(app)
-      # Registrar blueprints (rutas)
+    init_db(app)    # Registrar blueprints (rutas)
     app.register_blueprint(user_bp, url_prefix='/api/users')
     app.register_blueprint(password_reset_bp, url_prefix='/api/auth')
+    app.register_blueprint(profile_bp, url_prefix='/api/profile')
     
     # Ruta de prueba raíz
     @app.route('/')
