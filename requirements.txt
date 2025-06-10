@@ -13,6 +13,9 @@ bcrypt==4.1.2
 # Validaciones
 email-validator==2.1.0
 
+# Email
+secure-smtplib==0.1.1
+
 # Variables de entorno
 python-dotenv==1.0.0
 

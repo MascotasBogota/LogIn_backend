@@ -8,6 +8,7 @@ import os
 
 from config.database import init_db
 from routes.user_routes import user_bp
+from routes.password_reset_routes import password_reset_bp
 
 # Cargar variables de entorno
 load_dotenv()
@@ -25,9 +26,9 @@ def create_app():
     
     # Inicializar base de datos
     init_db(app)
-    
-    # Registrar blueprints (rutas)
+      # Registrar blueprints (rutas)
     app.register_blueprint(user_bp, url_prefix='/api/users')
+    app.register_blueprint(password_reset_bp, url_prefix='/api/auth')
     
     # Ruta de prueba raíz
     @app.route('/')
