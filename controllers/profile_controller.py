@@ -6,6 +6,8 @@ import jwt
 from datetime import datetime
 from flask import current_app
 from models.user import User
+from services.file_upload_service import FileUploadService
+from services.audit_service import audit_logger
 import re
 
 class ProfileController:
@@ -33,9 +35,11 @@ class ProfileController:
             
             # Retornar datos del perfil (sin contraseña)
             profile_data = user.to_dict(include_password=False)
-            
-            # Agregar indicador de contraseña protegida
+              # Agregar indicador de contraseña protegida
             profile_data['hasPassword'] = bool(user.password)
+            
+            # Registrar auditoría
+            audit_logger.log_profile_view(user_id, user.email)
             
             print(f'✅ Perfil obtenido para: {user.email}')
             
@@ -152,9 +156,13 @@ class ProfileController:
             
             # Actualizar timestamp
             user.updated_at = datetime.utcnow()
-            
-            # Guardar cambios
+              # Guardar cambios
             user.save()
+            
+            # Registrar auditoría
+            updated_data = {field: getattr(user, field.replace('Name', '_name').replace('Picture', '_picture').replace('Number', '_number'), None) 
+                          for field in updated_fields}
+            audit_logger.log_profile_update(user_id, user.email, updated_data)
             
             print(f'✅ Perfil actualizado. Campos: {", ".join(updated_fields)}')
             
@@ -201,13 +209,13 @@ class ProfileController:
             user = User.find_by_id(user_id)
             if not user:
                 return {'message': 'Usuario no encontrado'}, 404
-            
-            # Verificar contraseña actual
+              # Verificar contraseña actual
             current_password_bytes = current_password.encode('utf-8')
             stored_password_bytes = user.password.encode('utf-8')
             is_current_valid = bcrypt.checkpw(current_password_bytes, stored_password_bytes)
             
             if not is_current_valid:
+                audit_logger.log_password_change(user_id, user.email, success=False, reason='Contraseña actual incorrecta')
                 return {'message': 'Contraseña actual incorrecta'}, 400
             
             # Validar nueva contraseña
@@ -230,11 +238,13 @@ class ProfileController:
             # Hashear nueva contraseña
             salt = bcrypt.gensalt()
             hashed_password = bcrypt.hashpw(new_password_bytes, salt).decode('utf-8')
-            
-            # Actualizar contraseña
+              # Actualizar contraseña
             user.password = hashed_password
             user.updated_at = datetime.utcnow()
             user.save()
+            
+            # Registrar auditoría
+            audit_logger.log_password_change(user_id, user.email, success=True)
             
             print(f'✅ Contraseña cambiada para: {user.email}')
             
@@ -246,6 +256,64 @@ class ProfileController:
             print(f'❌ Error en change_password: {e}')
             return {
                 'message': 'Error cambiando contraseña',
+                'error': str(e)
+            }, 500
+    
+    @staticmethod
+    def upload_profile_picture(user_id, file):
+        """
+        Subir y actualizar foto de perfil del usuario
+        
+        Args:
+            user_id (str): ID del usuario
+            file: Archivo de imagen subido
+            
+        Returns:
+            tuple: (response_data, status_code)
+        """
+        try:
+            print(f'📤 Subiendo foto de perfil para usuario: {user_id}')
+            
+            # Buscar usuario por ID
+            user = User.find_by_id(user_id)
+            if not user:
+                return {'message': 'Usuario no encontrado'}, 404
+            
+            # Procesar y guardar imagen
+            success, result = FileUploadService.process_and_save_image(file, user_id)
+            
+            if not success:
+                audit_logger.log_profile_picture_upload(user_id, user.email, success=False, reason=result)
+                print(f'❌ Error subiendo archivo: {result}')
+                return {'message': result}, 400
+            
+            # Resultado contiene la URL de la nueva imagen
+            new_picture_url = result
+            
+            # Eliminar imagen anterior si existe
+            if user.profile_picture:
+                FileUploadService.delete_old_picture(user.profile_picture)
+            
+            # Actualizar URL en la base de datos
+            user.profile_picture = new_picture_url
+            user.updated_at = datetime.utcnow()
+            
+            if user.save():
+                # Registrar auditoría
+                audit_logger.log_profile_picture_upload(user_id, user.email, success=True)
+                
+                print(f'✅ Foto de perfil actualizada para: {user.email}')
+                return {
+                    'message': 'Foto de perfil actualizada exitosamente',
+                    'profile_picture': new_picture_url
+                }, 200
+            else:
+                return {'message': 'Error guardando cambios en la base de datos'}, 500
+                
+        except Exception as e:
+            print(f'❌ Error en upload_profile_picture: {e}')
+            return {
+                'message': 'Error subiendo foto de perfil',
                 'error': str(e)
             }, 500
     

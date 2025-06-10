@@ -2,6 +2,8 @@
 Rutas para gestión de perfil de usuario
 """
 from flask import Blueprint, request, jsonify
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 import jwt
 from functools import wraps
 from controllers.profile_controller import ProfileController
@@ -9,6 +11,13 @@ import os
 
 # Crear blueprint para rutas de perfil
 profile_bp = Blueprint('profile', __name__)
+
+# Configurar rate limiter
+limiter = Limiter(
+    key_func=get_remote_address,
+    storage_uri="memory://",
+    default_limits=["200 per day", "50 per hour"]
+)
 
 def token_required(f):
     """
@@ -138,17 +147,27 @@ def change_password(current_user_id):
 @token_required
 def upload_profile_picture(current_user_id):
     """
-    Subir foto de perfil (placeholder para implementación futura)
+    Subir foto de perfil
     
     Headers:
         Authorization: Bearer <jwt_token>
     
     Form Data:
-        file: imagen de perfil
+        file: imagen de perfil (png, jpg, jpeg, gif)
     """
-    # TODO: Implementar subida de archivos
-    # Por ahora, retorna un placeholder
-    return jsonify({
-        'message': 'Funcionalidad de subida de archivos en desarrollo',
-        'placeholder': 'Usa el endpoint PUT /profile para actualizar la URL de la imagen'
-    }), 501
+    try:
+        # Verificar que se envió un archivo
+        if 'file' not in request.files:
+            return jsonify({'message': 'No se envió ningún archivo'}), 400
+        
+        file = request.files['file']
+        
+        # Llamar al controlador para procesar el archivo
+        response_data, status_code = ProfileController.upload_profile_picture(current_user_id, file)
+        return jsonify(response_data), status_code
+        
+    except Exception as e:
+        return jsonify({
+            'message': 'Error subiendo foto de perfil',
+            'error': str(e)
+        }), 500

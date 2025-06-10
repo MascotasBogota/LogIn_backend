@@ -205,8 +205,7 @@ class TestProfileController:
             
             # Mock bcrypt para fallar verificación
             mock_bcrypt.checkpw.return_value = False
-            
-            # Ejecutar
+              # Ejecutar
             result, status_code = ProfileController.change_password(user_id, request_data)
             
             # Verificar
@@ -222,12 +221,25 @@ class TestProfileController:
             'newPassword': 'weak'  # Muy corta y sin requisitos
         }
         
-        # Ejecutar
-        result, status_code = ProfileController.change_password(user_id, request_data)
-        
-        # Verificar
-        assert status_code == 400
-        assert '6 caracteres' in result['message']
+        # Mock del modelo User y bcrypt
+        with patch('controllers.profile_controller.User') as mock_user_class, \
+             patch('controllers.profile_controller.bcrypt') as mock_bcrypt:
+            
+            # Mock usuario existente
+            mock_user = Mock()
+            mock_user._id = user_id
+            mock_user.password = 'hashed_password'
+            mock_user_class.find_by_id.return_value = mock_user
+            
+            # Mock bcrypt para pasar verificación de contraseña actual
+            mock_bcrypt.checkpw.return_value = True
+            
+            # Ejecutar
+            result, status_code = ProfileController.change_password(user_id, request_data)
+            
+            # Verificar
+            assert status_code == 400
+            assert '6 caracteres' in result['message']
     
     @pytest.mark.skipif(not IMPORT_SUCCESS, reason="No se pudo importar ProfileController")
     def test_update_profile_invalid_fields(self):
