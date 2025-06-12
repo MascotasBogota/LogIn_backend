@@ -10,6 +10,7 @@ from config.database import init_db
 from routes.user_routes import user_bp
 from routes.password_reset_routes import password_reset_bp
 from routes.profile_routes import profile_bp
+from api import create_api
 
 # Cargar variables de entorno
 load_dotenv()
@@ -30,12 +31,14 @@ def create_app():
     
     # Inicializar base de datos
     init_db(app)
-    
-    # Crear carpeta de uploads si no existe
+      # Crear carpeta de uploads si no existe
     upload_folder = 'uploads'
     os.makedirs(upload_folder, exist_ok=True)
     
-    # Registrar blueprints (rutas)
+    # Inicializar API Swagger
+    api = create_api(app)
+    
+    # Registrar blueprints (rutas legadas para compatibilidad)
     app.register_blueprint(user_bp, url_prefix='/api/users')
     app.register_blueprint(password_reset_bp, url_prefix='/api/auth')
     app.register_blueprint(profile_bp, url_prefix='/api/profile')
@@ -74,5 +77,7 @@ if __name__ == '__main__':
     
     print(f'🚀 Server running on port {port}')
     print(f'📡 API available at: http://localhost:{port}/api')
+    print(f'📚 Swagger UI available at: http://localhost:{port}/api/docs/')
+    print(f'📋 API JSON Schema at: http://localhost:{port}/api/swagger.json')
     
     app.run(host='0.0.0.0', port=port, debug=True)
