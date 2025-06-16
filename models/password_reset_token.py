@@ -25,14 +25,16 @@ class PasswordResetToken:
         return db.password_reset_tokens
     
     @staticmethod
-    def generate_token():
-        """Generar un token seguro de 32 caracteres"""
-        # Generar token aleatorio
-        random_token = secrets.token_urlsafe(32)
-        # Hash del token para almacenamiento seguro
-        token_hash = hashlib.sha256(random_token.encode()).hexdigest()
-        return random_token, token_hash
-    
+    def generate_token(length=6):
+        """Generar un código numérico aleatorio y su hash."""
+        # Generar código numérico aleatorio de 'length' dígitos
+        code = ''.join(secrets.choice('0123456789') for i in range(length))
+        
+        # Crear hash del código para almacenar en BD
+        code_hash = hashlib.sha256(code.encode('utf-8')).hexdigest()
+        
+        return code, code_hash # Devolver el código original y su hash
+
     def save(self):
         """Guardar token en la base de datos"""
         collection = self.get_collection()
@@ -106,3 +108,43 @@ class PasswordResetToken:
             not self.used and 
             self.expires_at > datetime.utcnow()
         )
+
+    @staticmethod
+    def find_valid_token_by_hash(user_id, token_hash):
+        """
+        Buscar un token válido (no usado, no expirado) por user_id y token_hash.
+        
+        Args:
+            user_id (str or ObjectId): ID del usuario.
+            token_hash (str): Hash del token a buscar.
+            
+        Returns:
+            PasswordResetToken or None: El objeto token si se encuentra y es válido, None en caso contrario.
+        """
+        collection = PasswordResetToken.get_collection()
+        
+        # Asegurarse que user_id es ObjectId
+        if not isinstance(user_id, ObjectId):
+            try:
+                user_id = ObjectId(user_id)
+            except Exception:
+                print(f"Error: user_id inválido para ObjectId: {user_id}")
+                return None
+
+        token_data = collection.find_one({
+            'user_id': user_id,
+            'token': token_hash,
+            'used': False,
+            'expires_at': {'$gt': datetime.utcnow()}
+        })
+        
+        if token_data:
+            return PasswordResetToken(
+                user_id=str(token_data['user_id']),
+                token=token_data['token'],
+                expires_at=token_data['expires_at'],
+                used=token_data['used'],
+                created_at=token_data.get('created_at'),
+                _id=str(token_data['_id'])
+            )
+        return None

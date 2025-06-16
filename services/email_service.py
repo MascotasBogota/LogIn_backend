@@ -75,132 +75,98 @@ class EmailService:
             return False
     
     @staticmethod
-    def send_password_reset_email(user_email, user_name, reset_token):
+    def send_password_reset_email(user_email, user_name, reset_code):
         """
-        Enviar email de restablecimiento de contraseña
-        
+        Enviar email con código de restablecimiento de contraseña
+
         Args:
-            user_email (str): Email del usuario
+            user_email (str): Email del destinatario
             user_name (str): Nombre del usuario
-            reset_token (str): Token de restablecimiento
+            reset_code (str): Código de restablecimiento (sin hash)
         
         Returns:
-            bool: True si se envió exitosamente
+            bool: True si se envió exitosamente, False en caso contrario
         """
-        # URL base del frontend (configurable)
-        frontend_url = os.getenv('FRONTEND_URL', 'http://localhost:3000')
-        reset_url = f"{frontend_url}/reset-password?token={reset_token}"
-        
-        subject = "Restablece tu contraseña - Mascotas App"
+        subject = "Código de Restablecimiento de Contraseña"
         
         # Contenido HTML del email
         html_content = f"""
-        <!DOCTYPE html>
         <html>
-        <head>
-            <meta charset="UTF-8">
-            <title>Restablece tu contraseña</title>
-            <style>
-                body {{
-                    font-family: Arial, sans-serif;
-                    line-height: 1.6;
-                    color: #333;
-                    max-width: 600px;
-                    margin: 0 auto;
-                    padding: 20px;
-                }}
-                .header {{
-                    background-color: #4CAF50;
-                    color: white;
-                    padding: 20px;
-                    text-align: center;
-                    border-radius: 8px 8px 0 0;
-                }}
-                .content {{
-                    background-color: #f9f9f9;
-                    padding: 30px;
-                    border-radius: 0 0 8px 8px;
-                }}
-                .button {{
-                    display: inline-block;
-                    background-color: #4CAF50;
-                    color: white;
-                    padding: 12px 24px;
-                    text-decoration: none;
-                    border-radius: 4px;
-                    margin: 20px 0;
-                }}
-                .footer {{
-                    margin-top: 20px;
-                    padding-top: 20px;
-                    border-top: 1px solid #ddd;
-                    font-size: 14px;
-                    color: #666;
-                }}
-                .warning {{
-                    background-color: #fff3cd;
-                    border: 1px solid #ffeaa7;
-                    padding: 15px;
-                    border-radius: 4px;
-                    margin: 20px 0;
-                }}
-            </style>
-        </head>
-        <body>
-            <div class="header">
-                <h1>🐾 Mascotas App</h1>
-                <h2>Restablecimiento de Contraseña</h2>
-            </div>
-            
-            <div class="content">
-                <p>Hola <strong>{user_name}</strong>,</p>
-                
-                <p>Recibimos una solicitud para restablecer la contraseña de tu cuenta en Mascotas App.</p>
-                
-                <p>Haz clic en el siguiente botón para crear una nueva contraseña:</p>
-                
-                <div style="text-align: center;">
-                    <a href="{reset_url}" class="button">Restablecer Contraseña</a>
-                </div>
-                
-                <p>O copia y pega este enlace en tu navegador:</p>
-                <p style="word-break: break-all; background-color: #f0f0f0; padding: 10px; border-radius: 4px;">
-                    {reset_url}
+            <head></head>
+            <body>
+                <h2>Hola {user_name},</h2>
+                <p>Has solicitado restablecer tu contraseña.</p>
+                <p>Usa el siguiente código para continuar con el proceso:</p>
+                <p style="font-size: 24px; font-weight: bold; letter-spacing: 2px; margin: 20px 0; text-align: center;">
+                    {reset_code}
                 </p>
-                
-                <div class="warning">
-                    <strong>⚠️ Importante:</strong>
-                    <ul>
-                        <li>Este enlace expira en <strong>1 hora</strong></li>
-                        <li>Solo puede ser usado una vez</li>
-                        <li>Si no solicitaste este cambio, ignora este email</li>
-                    </ul>
-                </div>
-                
-                <div class="footer">
-                    <p>Si tienes problemas con el enlace, contacta nuestro soporte.</p>
-                    <p>Gracias,<br>El equipo de Mascotas App</p>
-                </div>
-            </div>
-        </body>
+                <p>Este código expirará en 1 hora.</p>
+                <p>Si no solicitaste este cambio, puedes ignorar este correo.</p>
+                <br>
+                <p>Saludos,</p>
+                <p>El equipo de Tu Aplicación</p>
+            </body>
         </html>
         """
         
-        # Contenido en texto plano (fallback)
+        # Contenido en texto plano (opcional pero recomendado)
         text_content = f"""
         Hola {user_name},
 
-        Recibimos una solicitud para restablecer la contraseña de tu cuenta en Mascotas App.
+        Has solicitado restablecer tu contraseña.
+        Usa el siguiente código para continuar con el proceso: {reset_code}
 
-        Usa este enlace para crear una nueva contraseña:
-        {reset_url}
+        Este código expirará en 1 hora.
 
-        IMPORTANTE:
-        - Este enlace expira en 1 hora
-        - Solo puede ser usado una vez
-        - Si no solicitaste este cambio, ignora este email
+        Si no solicitaste este cambio, puedes ignorar este correo.
 
-        Gracias,
+        Saludos,
+        El equipo de Tu Aplicación
+        """
+        
+        print(f"🔑 Preparando email de reset con CÓDIGO para: {user_email}, Código: {reset_code}")
+        return EmailService.send_email(user_email, subject, html_content, text_content)
+
+    @staticmethod
+    def send_welcome_email(user_email, user_name):
+        """
+        Enviar email de bienvenida
+
+        Args:
+            user_email (str): Email del destinatario
+            user_name (str): Nombre del usuario
+
+        Returns:
+            bool: True si se envió exitosamente, False en caso contrario
+        """
+        subject = "Bienvenido a Mascotas App"
+        
+        # Contenido HTML del email
+        html_content = f"""
+        <html>
+            <head></head>
+            <body>
+                <h2>Hola {user_name},</h2>
+                <p>¡Bienvenido a Mascotas App!</p>
+                <p>Estamos emocionados de tenerte con nosotros. Ahora puedes disfrutar de todas las funcionalidades de nuestra aplicación.</p>
+                <p>Si tienes alguna pregunta, no dudes en contactarnos.</p>
+                <br>
+                <p>Saludos,</p>
+                <p>El equipo de Mascotas App</p>
+            </body>
+        </html>
+        """
+        
+        # Contenido en texto plano (opcional pero recomendado)
+        text_content = f"""
+        Hola {user_name},
+
+        ¡Bienvenido a Mascotas App!
+        Estamos emocionados de tenerte con nosotros. Ahora puedes disfrutar de todas las funcionalidades de nuestra aplicación.
+
+        Si tienes alguna pregunta, no dudes en contactarnos.
+
+        Saludos,
         El equipo de Mascotas App
         """
         

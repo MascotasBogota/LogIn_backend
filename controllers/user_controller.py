@@ -16,11 +16,11 @@ class UserController:
         """Registrar un nuevo usuario"""
         try:
             # Obtener datos del request
-            full_name = request_data.get('fullName', '').strip()
+            full_name = request_data.get('full_name', '').strip() # Cambiado a full_name
             email = request_data.get('email', '').strip()
             password = request_data.get('password', '')
             
-            print(f'📝 Datos recibidos: fullName={full_name}, email={email}, password=***')
+            print(f'📝 Datos recibidos para registro: full_name={full_name}, email={email}, password=***')
             
             # Crear cadena de validación
             validation_chain = create_user_validation_chain()
@@ -51,7 +51,7 @@ class UserController:
             
             # Crear el usuario
             user = User(
-                full_name=full_name,
+                full_name=full_name, # Usar full_name
                 email=email,
                 password=hashed_password
             )

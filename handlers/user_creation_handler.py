@@ -9,13 +9,13 @@ class RequiredFieldsHandler(Handler):
     """Validar que todos los campos requeridos estén presentes"""
     
     async def handle(self, context, response_handler):
-        full_name = context.get('fullName', '').strip()
+        full_name = context.get('full_name', '').strip() # Cambiado a full_name
         email = context.get('email', '').strip()
         password = context.get('password', '')
         
         if not full_name or not email or not password:
             response_handler({
-                'message': 'Todos los campos son obligatorios'
+                'message': 'Todos los campos son obligatorios (nombre, email, contraseña)'
             }, 400)
             return False
         
@@ -25,7 +25,7 @@ class FullNameHandler(Handler):
     """Validar longitud del nombre completo"""
     
     async def handle(self, context, response_handler):
-        full_name = context.get('fullName', '').strip()
+        full_name = context.get('full_name', '').strip() # Cambiado a full_name
         
         if len(full_name) < 2:
             response_handler({

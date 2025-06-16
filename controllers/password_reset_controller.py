@@ -42,7 +42,7 @@ class PasswordResetController:
                 print(f'❌ Usuario no encontrado: {email}')
                 # Por seguridad, no revelamos si el email existe o no
                 return {
-                    'message': 'Si el correo está registrado, recibirás un enlace para restablecer tu contraseña'
+                    'message': 'Si el correo está registrado, recibirás un código para restablecer tu contraseña'
                 }, 200
             
             print(f'✅ Usuario encontrado: {user.full_name}')
@@ -50,29 +50,29 @@ class PasswordResetController:
             # Invalidar tokens existentes del usuario
             PasswordResetToken.invalidate_user_tokens(user._id)
             
-            # Generar nuevo token
-            raw_token, token_hash = PasswordResetToken.generate_token()
+            # Generar nuevo código y su hash
+            raw_code, code_hash = PasswordResetToken.generate_token() # Ahora devuelve código y hash
             
-            # Crear registro del token en la base de datos
-            reset_token = PasswordResetToken(
+            # Crear registro del token (ahora código hash) en la base de datos
+            reset_token_entry = PasswordResetToken(
                 user_id=user._id,
-                token=token_hash
+                token=code_hash  # Guardar el hash del código
             )
             
-            token_id = reset_token.save()
-            print(f'✅ Token generado: {token_id}')
+            token_id = reset_token_entry.save()
+            print(f'✅ Código de reset (hash) guardado: {token_id}')
             
-            # Enviar email de restablecimiento
+            # Enviar email de restablecimiento con el código original
             email_sent = EmailService.send_password_reset_email(
                 user_email=user.email,
                 user_name=user.full_name,
-                reset_token=raw_token  # Enviamos el token sin hash
+                reset_code=raw_code  # Enviamos el código original, no el hash
             )
             
             if email_sent:
-                print(f'✅ Email enviado a: {email}')
+                print(f'✅ Email con código enviado a: {email}')
                 return {
-                    'message': 'Si el correo está registrado, recibirás un enlace para restablecer tu contraseña'
+                    'message': 'Si el correo está registrado, recibirás un código para restablecer tu contraseña'
                 }, 200
             else:
                 print(f'❌ Error enviando email a: {email}')
@@ -90,54 +90,47 @@ class PasswordResetController:
     @staticmethod
     def verify_reset_token(request_data):
         """
-        Verificar si un token de reset es válido
+        Verificar si un código de reset es válido
         
         Args:
-            request_data (dict): Datos del request con token
+            request_data (dict): Datos del request con email y código
             
         Returns:
             tuple: (response_data, status_code)
         """
         try:
-            token = request_data.get('token', '').strip()
+            email = request_data.get('email', '').strip().lower()
+            code_from_user = request_data.get('code', '').strip()
             
-            if not token:
-                return {'message': 'Token requerido'}, 400
+            print(f'🔐 Verificando código: {code_from_user} para email: {email}')
             
-            # Hash del token para búsqueda
-            token_hash = hashlib.sha256(token.encode()).hexdigest()
+            if not email or not code_from_user:
+                return {'message': 'El correo electrónico y el código son obligatorios'}, 400
             
-            # Buscar token en la base de datos
-            reset_token = PasswordResetToken.find_by_token(token_hash)
-            
-            if not reset_token or not reset_token.is_valid():
-                return {
-                    'message': 'Token inválido o expirado',
-                    'valid': False
-                }, 400
-            
-            # Buscar usuario asociado
-            user = User.find_by_id(reset_token.user_id)
-            
+            user = User.find_by_email(email)
             if not user:
-                return {
-                    'message': 'Usuario no encontrado',
-                    'valid': False
-                }, 400
+                # No revelar si el email existe
+                return {'message': 'Código inválido o expirado'}, 400
+                
+            # Hashear el código proporcionado por el usuario para compararlo
+            code_hash_from_user = hashlib.sha256(code_from_user.encode('utf-8')).hexdigest()
             
-            return {
-                'message': 'Token válido',
-                'valid': True,
-                'user_email': user.email
-            }, 200
+            # Buscar el token (código hash) en la base de datos
+            reset_token_entry = PasswordResetToken.find_valid_token_by_hash(user._id, code_hash_from_user)
+            
+            if not reset_token_entry:
+                print(f'❌ Código inválido o expirado para: {email}')
+                return {'message': 'Código inválido o expirado'}, 400
+            
+            print(f'✅ Código verificado para: {email}')
+            # Opcional: Marcar el token como usado si la verificación es el último paso antes del reset
+            # reset_token_entry.mark_as_used()
+            return {'message': 'Código verificado correctamente', 'user_id': str(user._id)}, 200
             
         except Exception as e:
             print(f'❌ Error en verify_reset_token: {e}')
-            return {
-                'message': 'Error verificando token',
-                'error': str(e)
-            }, 500
-    
+            return {'message': 'Error procesando solicitud', 'error': str(e)}, 500
+
     @staticmethod
     def reset_password(request_data):
         """
