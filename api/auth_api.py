@@ -136,6 +136,29 @@ def register_auth_api(api):
             except Exception as e:
                 current_app.logger.error(f"Error resetting password: {str(e)}")
                 return {'message': 'Error interno del servidor'}, 500
+
+    @auth_ns.route('/google_login') # New route for Google Sign-In
+    class GoogleLoginResource(Resource):
+        @auth_ns.doc(
+            'google_login',
+            description='Iniciar sesión o registrarse con Google ID Token.',
+            responses={
+                200: ('Login/Registro con Google exitoso', models['user_response']),
+                400: ('Token de Google ID es requerido o inválido', models['error_response']),
+                401: ('Token de Google inválido o expirado', models['error_response']),
+                500: ('Error interno del servidor / Google Sign-In no configurado', models['error_response'])
+            }
+        )
+        @auth_ns.expect(models['google_login_request'], validate=True)
+        @auth_ns.marshal_with(models['user_response'], code=200)
+        def post(self):
+            """Manejar el login/registro con Google"""
+            try:
+                data = request.get_json()
+                return auth_controller.google_login(data)
+            except Exception as e:
+                current_app.logger.error(f"Error in Google login endpoint: {str(e)}")
+                return {'message': 'Error interno del servidor durante el login con Google'}, 500
     
     # Registrar namespace
     api.add_namespace(auth_ns)

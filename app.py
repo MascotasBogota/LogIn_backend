@@ -22,12 +22,19 @@ def create_app():
     # Configuración
     app.config['SECRET_KEY'] = os.getenv('JWT_SECRET', 'mascotas_secret_key')
     app.config['MONGO_URI'] = os.getenv('MONGO_URI', 'mongodb://localhost:27017/mascotas-app')
+    app.config['GOOGLE_CLIENT_ID'] = os.getenv('GOOGLE_CLIENT_ID') # Load Google Client ID
     
     # Configuración para archivos subidos
     app.config['MAX_CONTENT_LENGTH'] = 5 * 1024 * 1024  # 5MB max file size
     
     # Configurar CORS
-    CORS(app, origins=['http://localhost:5173', 'http://localhost:3000'])
+    CORS(
+        app,
+        origins=['http://localhost:5173', 'http://localhost:3000'],
+        supports_credentials=True,  # Allows cookies to be sent (if you use them)
+        allow_headers=['Content-Type', 'Authorization'],  # Explicitly allow Authorization header
+        methods=['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']  # Explicitly list allowed methods
+    )
     
     # Inicializar base de datos
     init_db(app)

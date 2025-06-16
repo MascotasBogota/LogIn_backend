@@ -139,6 +139,14 @@ def create_swagger_models(api):
         )
     })
     
+    google_login_request = api.model('GoogleLoginRequest', {
+        'token': fields.String(
+            required=True,
+            description='Google ID Token obtenido del frontend',
+            example='eyJhbGciOiJSUzI1NiIsImtpZCI6ImFjY2Vzc190b2tlbiJ9...'
+        )
+    })
+    
     # Modelo para subida de archivos
     file_upload_response = api.model('FileUploadResponse', {
         'message': fields.String(description='Mensaje de confirmación'),
@@ -159,5 +167,6 @@ def create_swagger_models(api):
         'forgot_password': forgot_password,
         'verify_token': verify_token,
         'reset_password': reset_password,
+        'google_login_request': google_login_request,
         'file_upload_response': file_upload_response
     }
