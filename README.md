@@ -93,7 +93,7 @@ La API estará disponible en: `http://localhost:5000`
 ```json
 POST /api/users/register
 {
-  "fullName": "Juan Pérez",
+  "full_name": "Juan Pérez",
   "email": "juan@ejemplo.com",
   "password": "MiPassword123"
 }

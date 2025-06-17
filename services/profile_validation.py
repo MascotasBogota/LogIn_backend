@@ -2,7 +2,7 @@
 Servicio para crear la cadena de validación de perfil
 """
 from handlers.profile_validation_handler import (
-    FullNameValidationHandler,
+    full_nameValidationHandler,
     EmailValidationHandler,
     UsernameValidationHandler,
     GenderValidationHandler,
@@ -14,7 +14,7 @@ def create_profile_validation_chain():
     """Crear la cadena de validación para actualización de perfil"""
     
     # Crear instancias de cada handler
-    full_name_validator = FullNameValidationHandler()
+    full_name_validator = full_nameValidationHandler()
     email_validator = EmailValidationHandler()
     username_validator = UsernameValidationHandler()
     gender_validator = GenderValidationHandler()

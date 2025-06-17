@@ -105,7 +105,7 @@ POST /api/users/register
 **Body:**
 ```json
 {
-  "fullName": "Juan Pérez",
+  "full_name": "Juan Pérez",
   "email": "juan@ejemplo.com",
   "password": "MiPassword123"
 }
@@ -186,7 +186,7 @@ const getProfile = async () => {
   "message": "Perfil obtenido exitosamente",
   "profile": {
     "id": "user_id_123",
-    "fullName": "Juan Pérez",
+    "full_name": "Juan Pérez",
     "email": "juan@ejemplo.com",
     "username": "juanperez",
     "profilePicture": "/static/uploads/profile_pictures/user_123_abc123.jpg",
@@ -230,7 +230,7 @@ const updateProfile = async (profileData) => {
 
 // Ejemplo de uso
 updateProfile({
-  fullName: "Juan Carlos Pérez",
+  full_name: "Juan Carlos Pérez",
   username: "juancperez",
   gender: "masculino",
   address: "Nueva Dirección 456",
@@ -474,8 +474,8 @@ const UserProfile = () => {
         <form onSubmit={(e) => { e.preventDefault(); handleSave(); }}>
           <input
             type="text"
-            value={formData.fullName || ''}
-            onChange={(e) => setFormData(prev => ({...prev, fullName: e.target.value}))}
+            value={formData.full_name || ''}
+            onChange={(e) => setFormData(prev => ({...prev, full_name: e.target.value}))}
             placeholder="Nombre completo"
           />
           <input
@@ -510,7 +510,7 @@ const UserProfile = () => {
         </form>
       ) : (
         <div className="profile-info">
-          <h2>{profile?.fullName}</h2>
+          <h2>{profile?.full_name}</h2>
           <p>@{profile?.username}</p>
           <p>{profile?.email}</p>
           <p>{profile?.gender}</p>
@@ -620,7 +620,7 @@ export default {
 ```typescript
 interface UserProfile {
   id: string;                    // ID único del usuario
-  fullName: string;              // Nombre completo (requerido)
+  full_name: string;              // Nombre completo (requerido)
   email: string;                 // Email único (requerido)
   username?: string;             // Nombre de usuario único (opcional)
   profilePicture?: string;       // URL de la imagen de perfil
@@ -637,7 +637,7 @@ interface UserProfile {
 
 | Campo | Tipo | Requerido | Validaciones |
 |-------|------|-----------|--------------|
-| `fullName` | string | ✅ | Mínimo 2 caracteres |
+| `full_name` | string | ✅ | Mínimo 2 caracteres |
 | `email` | string | ✅ | Formato válido, único |
 | `username` | string | ❌ | 3-20 caracteres, alfanumérico + _, único |
 | `profilePicture` | string | ❌ | URL válida |
@@ -714,8 +714,8 @@ class AuthService {
 const validateProfileData = (data) => {
   const errors = {};
 
-  if (!data.fullName || data.fullName.length < 2) {
-    errors.fullName = 'El nombre debe tener al menos 2 caracteres';
+  if (!data.full_name || data.full_name.length < 2) {
+    errors.full_name = 'El nombre debe tener al menos 2 caracteres';
   }
 
   if (data.username && (data.username.length < 3 || data.username.length > 20)) {

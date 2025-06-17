@@ -50,7 +50,7 @@ class TestProfileController:
             mock_user.password = 'hashed_password'
             mock_user.to_dict.return_value = {
                 '_id': user_id,
-                'fullName': 'Test User',
+                'full_name': 'Test User',
                 'email': 'test@example.com',
                 'username': 'testuser'
             }
@@ -62,7 +62,7 @@ class TestProfileController:
             # Verificar
             assert status_code == 200
             assert 'profile' in result
-            assert result['profile']['fullName'] == 'Test User'
+            assert result['profile']['full_name'] == 'Test User'
             assert 'hasPassword' in result['profile']
     
     @pytest.mark.skipif(not IMPORT_SUCCESS, reason="No se pudo importar ProfileController")
@@ -86,7 +86,7 @@ class TestProfileController:
         """Test actualización exitosa de perfil"""
         user_id = 'mock_user_id'
         request_data = {
-            'fullName': 'Nuevo Nombre',
+            'full_name': 'Nuevo Nombre',
             'email': 'nuevo@example.com',
             'username': 'nuevo_username'
         }
@@ -102,7 +102,7 @@ class TestProfileController:
             mock_user.save.return_value = user_id
             mock_user.to_dict.return_value = {
                 '_id': user_id,
-                'fullName': 'Nuevo Nombre',
+                'full_name': 'Nuevo Nombre',
                 'email': 'nuevo@example.com',
                 'username': 'nuevo_username'
             }
@@ -247,7 +247,7 @@ class TestProfileController:
         user_id = 'mock_user_id'
         request_data = {
             'password': 'should_not_be_allowed',  # Campo no permitido
-            'fullName': 'Valid Name'
+            'full_name': 'Valid Name'
         }
         
         # Mock del modelo User

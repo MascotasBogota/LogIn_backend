@@ -40,7 +40,7 @@ class User:
             collection.create_index("username", unique=True, sparse=True)
         
         user_data = {
-            'fullName': self.full_name,
+            'full_name': self.full_name,
             'email': self.email,
             'password': self.password,
             'createdAt': self.created_at,
@@ -84,7 +84,7 @@ class User:
         
         if user_data:
             return User(
-                full_name=user_data['fullName'],
+                full_name=user_data['full_name'],
                 email=user_data['email'],
                 password=user_data['password'],
                 username=user_data.get('username'),
@@ -106,7 +106,7 @@ class User:
         
         if user_data:
             return User(
-                full_name=user_data['fullName'],
+                full_name=user_data['full_name'],
                 email=user_data['email'],
                 password=user_data['password'],
                 username=user_data.get('username'),
@@ -124,7 +124,7 @@ class User:
         """Convertir usuario a diccionario para respuesta JSON"""
         user_dict = {
             '_id': str(self._id),
-            'fullName': self.full_name,
+            'full_name': self.full_name,
             'email': self.email,
             'createdAt': self.created_at,
             'updatedAt': self.updated_at
@@ -202,7 +202,7 @@ class User:
         
         if user_data:
             return User(
-                full_name=user_data['fullName'],
+                full_name=user_data['full_name'],
                 email=user_data['email'],
                 password=user_data['password'],
                 username=user_data.get('username'),

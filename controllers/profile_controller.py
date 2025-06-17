@@ -85,11 +85,11 @@ class ProfileController:
             updated_fields = []
             
             # Campos básicos
-            if 'fullName' in request_data:
-                full_name = request_data['fullName'].strip()
+            if 'full_name' in request_data:
+                full_name = request_data['full_name'].strip()
                 if len(full_name) >= 2:
                     user.full_name = full_name
-                    updated_fields.append('fullName')
+                    updated_fields.append('full_name')
                 else:
                     return {'message': 'El nombre debe tener al menos 2 caracteres'}, 400
             
@@ -331,7 +331,7 @@ class ProfileController:
         """
         # Lista de campos válidos para actualizar
         allowed_fields = [
-            'fullName', 'email', 'username', 'profilePicture', 
+            'full_name', 'email', 'username', 'profilePicture', 
             'gender', 'address', 'phoneNumber'
         ]
         

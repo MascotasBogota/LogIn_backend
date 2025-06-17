@@ -78,7 +78,7 @@ Abre tu navegador y visita:
 ### **UserRegistration**
 ```json
 {
-  "fullName": "Juan Pérez",
+  "full_name": "Juan Pérez",
   "email": "juan@ejemplo.com", 
   "password": "MiPassword123"
 }
@@ -95,7 +95,7 @@ Abre tu navegador y visita:
 ### **ProfileUpdate**
 ```json
 {
-  "fullName": "Juan Carlos Pérez",
+  "full_name": "Juan Carlos Pérez",
   "username": "juanperez",
   "email": "juan@ejemplo.com",
   "gender": "masculino",
@@ -191,7 +191,7 @@ Abre tu navegador y visita:
 ```bash
 POST /api/auth/register
 {
-  "fullName": "Test User",
+  "full_name": "Test User",
   "email": "test@example.com",
   "password": "Test123456"
 }

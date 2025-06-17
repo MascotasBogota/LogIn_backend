@@ -3,7 +3,7 @@ Servicio para crear la cadena de validación de usuarios
 """
 from handlers.user_creation_handler import (
     RequiredFieldsHandler,
-    FullNameHandler,
+    full_nameHandler,
     ValidEmailHandler,
     PasswordLengthHandler,
     StrongPasswordHandler,
@@ -15,7 +15,7 @@ def create_user_validation_chain():
     
     # Crear instancias de cada handler
     required_fields = RequiredFieldsHandler()
-    full_name_validator = FullNameHandler()
+    full_name_validator = full_nameHandler()
     email_validator = ValidEmailHandler()
     password_length = PasswordLengthHandler()
     password_strength = StrongPasswordHandler()

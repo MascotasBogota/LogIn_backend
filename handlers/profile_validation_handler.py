@@ -9,11 +9,11 @@ class ProfileValidationHandler(Handler):
     """Handler base para validaciones de perfil"""
     pass
 
-class FullNameValidationHandler(ProfileValidationHandler):
+class full_nameValidationHandler(ProfileValidationHandler):
     """Validar nombre completo en perfil"""
     
     async def handle(self, context, response_handler):
-        full_name = context.get('fullName')
+        full_name = context.get('full_name')
         
         if full_name is not None:  # Solo validar si se envía
             full_name = full_name.strip()

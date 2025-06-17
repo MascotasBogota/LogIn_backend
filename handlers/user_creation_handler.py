@@ -21,7 +21,7 @@ class RequiredFieldsHandler(Handler):
         
         return await super().handle(context, response_handler)
 
-class FullNameHandler(Handler):
+class full_nameHandler(Handler):
     """Validar longitud del nombre completo"""
     
     async def handle(self, context, response_handler):

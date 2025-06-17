@@ -36,7 +36,7 @@ class TestUserController:
         """Test registro exitoso de usuario"""
         # Datos de prueba
         request_data = {
-            'fullName': 'Test User',
+            'full_name': 'Test User',
             'email': 'test@example.com',
             'password': 'Password123'
         }
@@ -55,7 +55,7 @@ class TestUserController:
             mock_user.save.return_value = 'mock_user_id'
             mock_user.to_dict.return_value = {
                 '_id': 'mock_user_id',
-                'fullName': 'Test User',
+                'full_name': 'Test User',
                 'email': 'test@example.com'
             }
             mock_user_class.return_value = mock_user
@@ -66,7 +66,7 @@ class TestUserController:
             
             # Verificar
             assert status_code == 201
-            assert 'fullName' in result or 'message' in result    @pytest.mark.skipif(not IMPORT_SUCCESS, reason="No se pudo importar UserController")
+            assert 'full_name' in result or 'message' in result    @pytest.mark.skipif(not IMPORT_SUCCESS, reason="No se pudo importar UserController")
     def test_login_user_success(self):
         """Test login exitoso"""
         # Datos de prueba
@@ -88,7 +88,7 @@ class TestUserController:
                 mock_user.password = '$2b$12$hash'  # Hash mock
                 mock_user.to_dict.return_value = {
                     '_id': 'mock_user_id',
-                    'fullName': 'Test User',
+                    'full_name': 'Test User',
                     'email': 'test@example.com'
                 }
                 mock_user_class.find_by_email.return_value = mock_user

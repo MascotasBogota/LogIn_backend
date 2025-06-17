@@ -23,7 +23,7 @@ class ProfileIntegrationExample:
         print("📝 Registrando nuevo usuario...")
         
         register_data = {
-            "fullName": "Usuario de Prueba",
+            "full_name": "Usuario de Prueba",
             "email": EMAIL,
             "password": PASSWORD
         }
@@ -79,7 +79,7 @@ class ProfileIntegrationExample:
             profile = response.json()['profile']
             print("✅ Perfil obtenido:")
             print(f"   📧 Email: {profile['email']}")
-            print(f"   👤 Nombre: {profile['fullName']}")
+            print(f"   👤 Nombre: {profile['full_name']}")
             print(f"   🆔 ID: {profile['id']}")
             return profile
         else:
@@ -191,7 +191,7 @@ class ProfileIntegrationExample:
             profile = response.json()['profile']
             print("✅ Perfil actualizado obtenido:")
             print(f"   📧 Email: {profile['email']}")
-            print(f"   👤 Nombre: {profile['fullName']}")
+            print(f"   👤 Nombre: {profile['full_name']}")
             print(f"   🆔 Username: {profile.get('username', 'No establecido')}")
             print(f"   👫 Género: {profile.get('gender', 'No establecido')}")
             print(f"   🏠 Dirección: {profile.get('address', 'No establecida')}")

@@ -83,7 +83,7 @@ def update_profile(current_user_id):
     
     Expected JSON:
     {
-        "fullName": "Nuevo Nombre",
+        "full_name": "Nuevo Nombre",
         "email": "nuevo@email.com",
         "username": "nuevo_username",
         "profilePicture": "url_to_image",

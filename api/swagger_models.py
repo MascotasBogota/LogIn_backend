@@ -20,7 +20,7 @@ def create_swagger_models(api):
     
     # Modelos de Usuario
     user_registration = api.model('UserRegistration', {
-        'fullName': fields.String(
+        'full_name': fields.String(
             required=True, 
             description='Nombre completo del usuario (mínimo 2 caracteres)', 
             example='Juan Pérez'
@@ -52,7 +52,7 @@ def create_swagger_models(api):
     
     user_info = api.model('UserInfo', {
         'id': fields.String(description='ID único del usuario'),
-        'fullName': fields.String(description='Nombre completo'),
+        'full_name': fields.String(description='Nombre completo'),
         'email': fields.String(description='Correo electrónico'),
         'username': fields.String(description='Nombre de usuario'),
         'gender': fields.String(description='Género', enum=['masculino', 'femenino', 'otro', 'prefiero_no_decir']),
@@ -77,7 +77,7 @@ def create_swagger_models(api):
     })
     
     profile_update = api.model('ProfileUpdate', {
-        'fullName': fields.String(description='Nombre completo (mín. 2 caracteres)', example='Juan Carlos Pérez'),
+        'full_name': fields.String(description='Nombre completo (mín. 2 caracteres)', example='Juan Carlos Pérez'),
         'username': fields.String(description='Nombre de usuario (3-20 caracteres, alfanumérico + _)', example='juanperez'),
         'email': fields.String(description='Correo electrónico válido', example='juan@ejemplo.com'),
         'gender': fields.String(
