@@ -119,6 +119,11 @@ def create_swagger_models(api):
     })
     
     verify_token = api.model('VerifyToken', {
+        'email': fields.String(  # Add email field
+            required=True, 
+            description='Correo electrónico del usuario', 
+            example='juan@ejemplo.com'
+        ),
         'token': fields.String(
             required=True, 
             description='Token de restablecimiento recibido por email', 

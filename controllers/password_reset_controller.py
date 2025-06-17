@@ -113,7 +113,7 @@ class PasswordResetController:
         """
         try:
             email = request_data.get('email', '').strip().lower()
-            code_from_user = request_data.get('code', '').strip()
+            code_from_user = request_data.get('token', '').strip() # Changed 'code' to 'token'
             
             print(f'🔐 Verificando código: {code_from_user} para email: {email}')
             
@@ -157,7 +157,7 @@ class PasswordResetController:
         """
         try:
             token = request_data.get('token', '').strip()
-            new_password = request_data.get('password', '')
+            new_password = request_data.get('newPassword', '') # Changed 'password' to 'newPassword'
             
             print(f'🔐 Restablecimiento de contraseña con token')
             
