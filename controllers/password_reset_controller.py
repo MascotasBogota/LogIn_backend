@@ -2,7 +2,7 @@
 Controlador para restablecimiento de contraseñas
 """
 import bcrypt
-from flask import current_app
+from flask import current_app # Asegúrate que current_app esté importado
 from models.user import User
 from models.password_reset_token import PasswordResetToken
 from services.email_service import EmailService
@@ -23,7 +23,20 @@ class PasswordResetController:
             tuple: (response_data, status_code)
         """
         try:
-            email = request_data.get('email', '').strip().lower()
+            email_value = request_data.get('email') # Obtener el valor primero
+
+            if isinstance(email_value, str): # Verificar si es una cadena
+                email = email_value.strip().lower()
+            elif email_value is None: # Si la clave 'email' no existe
+                 email = '' # Asignar cadena vacía para que las validaciones posteriores funcionen
+            else:
+                # Si 'email' existe pero no es una cadena (inesperado)
+                # Usar current_app.logger si está disponible y configurado, sino print
+                if hasattr(current_app, 'logger'):
+                    current_app.logger.error(f"Formato inesperado para 'email' en request_data: {type(email_value)}")
+                else:
+                    print(f"ERROR: Formato inesperado para 'email' en request_data: {type(email_value)}")
+                return {'message': 'Formato de email inválido en la solicitud.'}, 400
             
             print(f'🔐 Solicitud de reset para: {email}')
             

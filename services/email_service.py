@@ -104,7 +104,7 @@ class EmailService:
                 <p>Si no solicitaste este cambio, puedes ignorar este correo.</p>
                 <br>
                 <p>Saludos,</p>
-                <p>El equipo de Tu Aplicación</p>
+                <p>Mascotas Bogota <3 </p>
             </body>
         </html>
         """
@@ -121,7 +121,7 @@ class EmailService:
         Si no solicitaste este cambio, puedes ignorar este correo.
 
         Saludos,
-        El equipo de Tu Aplicación
+        Mascotas Bogota <3
         """
         
         print(f"🔑 Preparando email de reset con CÓDIGO para: {user_email}, Código: {reset_code}")
