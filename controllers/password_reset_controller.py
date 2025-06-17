@@ -58,7 +58,9 @@ class PasswordResetController:
                     'message': 'Si el correo está registrado, recibirás un código para restablecer tu contraseña'
                 }, 200
             
-            print(f'✅ Usuario encontrado: {user.full_name}')
+            # Safely access full_name, providing a default if it's missing or None
+            user_display_name = getattr(user, 'full_name', None) or user.email # Use email as fallback
+            print(f'✅ Usuario encontrado: {user_display_name}')
             
             # Invalidar tokens existentes del usuario
             PasswordResetToken.invalidate_user_tokens(user._id)
@@ -78,7 +80,7 @@ class PasswordResetController:
             # Enviar email de restablecimiento con el código original
             email_sent = EmailService.send_password_reset_email(
                 user_email=user.email,
-                user_name=user.full_name,
+                user_name=user_display_name, # Use the safe display name
                 reset_code=raw_code  # Enviamos el código original, no el hash
             )
             

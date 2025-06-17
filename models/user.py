@@ -84,9 +84,9 @@ class User:
         
         if user_data:
             return User(
-                full_name=user_data['full_name'],
-                email=user_data['email'],
-                password=user_data['password'],
+                full_name=user_data.get('full_name'), # Changed to .get()
+                email=user_data.get('email'), # Also make email safe, though it should exist
+                password=user_data.get('password'), # Also make password safe
                 username=user_data.get('username'),
                 profile_picture=user_data.get('profilePicture'),
                 gender=user_data.get('gender'),
@@ -106,9 +106,9 @@ class User:
         
         if user_data:
             return User(
-                full_name=user_data['full_name'],
-                email=user_data['email'],
-                password=user_data['password'],
+                full_name=user_data.get('full_name'), # Changed to .get()
+                email=user_data.get('email'),
+                password=user_data.get('password'),
                 username=user_data.get('username'),
                 profile_picture=user_data.get('profilePicture'),
                 gender=user_data.get('gender'),
@@ -202,9 +202,9 @@ class User:
         
         if user_data:
             return User(
-                full_name=user_data['full_name'],
-                email=user_data['email'],
-                password=user_data['password'],
+                full_name=user_data.get('full_name'), # Changed to .get()
+                email=user_data.get('email'),
+                password=user_data.get('password'),
                 username=user_data.get('username'),
                 profile_picture=user_data.get('profilePicture'),
                 gender=user_data.get('gender'),
