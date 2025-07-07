@@ -58,6 +58,7 @@ def create_swagger_models(api):
         'gender': fields.String(description='Género', enum=['masculino', 'femenino', 'otro', 'prefiero_no_decir']),
         'address': fields.String(description='Dirección completa'),
         'phoneNumber': fields.String(description='Número de teléfono'),
+        'reputation': fields.Integer(description='Reputación del usuario', default=0),
         'profilePicture': fields.String(description='URL de la foto de perfil'),
         'hasPassword': fields.Boolean(description='Indica si tiene contraseña establecida'),
         'createdAt': fields.DateTime(description='Fecha de creación'),
@@ -157,7 +158,11 @@ def create_swagger_models(api):
         'message': fields.String(description='Mensaje de confirmación'),
         'profile_picture': fields.String(description='URL de la imagen subida')
     })
-    
+
+    reputation_update = api.model('ReputationUpdate', {
+        'reputation_delta': fields.Integer(required=True, description='Cambio en la reputación (positivo o negativo)', example=10)
+    })
+
     return {
         'base_response': base_response,
         'error_response': error_response,
@@ -173,5 +178,6 @@ def create_swagger_models(api):
         'verify_token': verify_token,
         'reset_password': reset_password,
         'google_login_request': google_login_request,
-        'file_upload_response': file_upload_response
+        'file_upload_response': file_upload_response,
+        'reputation_update': reputation_update
     }

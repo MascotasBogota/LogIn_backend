@@ -19,6 +19,7 @@ class User:
         self.gender = kwargs.get('gender', None)  # 'male', 'female', 'other', 'prefer_not_to_say'
         self.address = kwargs.get('address', None)
         self.phone_number = kwargs.get('phone_number', None)
+        self.reputation = kwargs.get('reputation', 0)
         # Campos de auditoría
         self.created_at = kwargs.get('created_at', datetime.utcnow())
         self.updated_at = kwargs.get('updated_at', datetime.utcnow())
@@ -58,6 +59,7 @@ class User:
             user_data['address'] = self.address
         if self.phone_number:
             user_data['phoneNumber'] = self.phone_number
+        user_data['reputation'] = self.reputation
         
         try:
             if self._id:
@@ -92,6 +94,7 @@ class User:
                 gender=user_data.get('gender'),
                 address=user_data.get('address'),
                 phone_number=user_data.get('phoneNumber'),
+                reputation=user_data.get('reputation', 0),
                 created_at=user_data.get('createdAt'),
                 updated_at=user_data.get('updatedAt'),
                 _id=str(user_data['_id'])
@@ -114,6 +117,7 @@ class User:
                 gender=user_data.get('gender'),
                 address=user_data.get('address'),
                 phone_number=user_data.get('phoneNumber'),
+                reputation=user_data.get('reputation', 0),
                 created_at=user_data.get('createdAt'),
                 updated_at=user_data.get('updatedAt'),
                 _id=str(user_data['_id'])
@@ -210,6 +214,7 @@ class User:
                 gender=user_data.get('gender'),
                 address=user_data.get('address'),
                 phone_number=user_data.get('phoneNumber'),
+                reputation=user_data.get('reputation', 0),
                 created_at=user_data.get('createdAt'),
                 updated_at=user_data.get('updatedAt'),
                 _id=str(user_data['_id'])

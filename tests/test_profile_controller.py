@@ -13,6 +13,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 # Intentar importar el controlador
 try:
     from controllers.profile_controller import ProfileController
+    from controllers.reputation_controller import ReputationController
     IMPORT_SUCCESS = True
 except ImportError as e:
     print(f"Warning: Could not import ProfileController: {e}")
@@ -263,6 +264,45 @@ class TestProfileController:
             assert status_code == 400
             assert 'no permitidos' in result['message']
     
+    @pytest.mark.skipif(not IMPORT_SUCCESS, reason="No se pudo importar ReputationController")
+    def test_update_reputation_success(self):
+        """Test actualizar reputación exitosamente"""
+        user_id = 'mock_user_id'
+        reputation_delta = 10
+        
+        with patch('controllers.reputation_controller.User') as mock_user_class:
+            mock_user = Mock()
+            mock_user._id = user_id
+            mock_user.reputation = 0
+            mock_user.save.return_value = user_id
+            mock_user_class.find_by_id.return_value = mock_user
+            
+            from app import app
+            with app.app_context():
+                result, status_code = ReputationController.update_reputation(user_id, reputation_delta)
+            
+            assert status_code == 200
+            assert 'Reputación actualizada exitosamente' in result['message']
+            assert result['reputation'] == 10
+            mock_user.save.assert_called_once()
+
+    @pytest.mark.skipif(not IMPORT_SUCCESS, reason="No se pudo importar ReputationController")
+    def test_update_reputation_user_not_found(self):
+        """Test actualizar reputación de usuario no existente"""
+        user_id = 'nonexistent_user_id'
+        reputation_delta = 5
+        
+        with patch('controllers.reputation_controller.User') as mock_user_class:
+            mock_user_class.find_by_id.return_value = None
+            
+            from app import create_app
+            app = create_app()
+            with app.app_context():
+                result, status_code = ReputationController.update_reputation(user_id, reputation_delta)
+            
+            assert status_code == 404
+            assert 'Usuario no encontrado' in result['message']
+    
     def test_basic_import(self):
         """Test básico para verificar que al menos podemos hacer tests"""
         assert True
@@ -271,5 +311,6 @@ class TestProfileController:
             assert hasattr(ProfileController, 'get_profile')
             assert hasattr(ProfileController, 'update_profile')
             assert hasattr(ProfileController, 'change_password')
+            assert hasattr(ReputationController, 'update_reputation')
         else:
-            pytest.skip("ProfileController no se pudo importar, pero el framework de tests funciona")
+            pytest.skip("ProfileController o ReputationController no se pudo importar, pero el framework de tests funciona")
