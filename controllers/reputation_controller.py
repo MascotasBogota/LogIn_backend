@@ -19,11 +19,13 @@ class ReputationController:
             user.reputation += reputation_delta
             user.save()
 
-            return jsonify({
-                "message": "Reputación actualizada exitosamente",
+            resObj = {"message": "Reputación actualizada exitosamente",
                 "success": True,
-                "reputation": user.reputation
-            }), 200
+                "reputation": user.reputation,
+                "user":user.to_dict()}
+            print(resObj)
+
+            return jsonify(resObj), 200
         except Exception as e:
             print(f"❌ Error al actualizar la reputación: {str(e)}")
             return jsonify({"message": "Error interno del servidor", "error": str(e), "success": False}), 500
