@@ -9,10 +9,11 @@ import re
 
 class User:
     """Modelo de Usuario"""
-    def __init__(self, full_name=None, email=None, password=None, **kwargs):
+    def __init__(self, full_name=None, email=None, password=None,reputation=0, **kwargs):
         self.full_name = full_name
         self.email = email.lower() if email else None
         self.password = password
+        self.reputation = reputation
         # Nuevos campos para perfil completo
         self.username = kwargs.get('username', None)
         self.profile_picture = kwargs.get('profile_picture', None)
@@ -56,8 +57,11 @@ class User:
             user_data['gender'] = self.gender
         if self.address:
             user_data['address'] = self.address
+        if self.reputation:
+            user_data['reputation'] = self.reputation
         if self.phone_number:
             user_data['phoneNumber'] = self.phone_number
+        user_data['reputation'] = self.reputation
         
         try:
             if self._id:
@@ -92,6 +96,7 @@ class User:
                 gender=user_data.get('gender'),
                 address=user_data.get('address'),
                 phone_number=user_data.get('phoneNumber'),
+                reputation=user_data.get('reputation'),
                 created_at=user_data.get('createdAt'),
                 updated_at=user_data.get('updatedAt'),
                 _id=str(user_data['_id'])
@@ -103,7 +108,8 @@ class User:
         """Buscar usuario por ID"""
         collection = User.get_collection()
         user_data = collection.find_one({'_id': ObjectId(user_id)})
-        
+        print(f"🆗 user_data: {user_data}")  # Debugging line
+        print(user_data.get('reputation'))  # Debugging line
         if user_data:
             return User(
                 full_name=user_data.get('full_name'), # Changed to .get()
@@ -114,6 +120,7 @@ class User:
                 gender=user_data.get('gender'),
                 address=user_data.get('address'),
                 phone_number=user_data.get('phoneNumber'),
+                reputation=user_data.get('reputation'),
                 created_at=user_data.get('createdAt'),
                 updated_at=user_data.get('updatedAt'),
                 _id=str(user_data['_id'])
@@ -139,6 +146,8 @@ class User:
             user_dict['gender'] = self.gender
         if self.address:
             user_dict['address'] = self.address
+        if self.reputation:
+            user_dict['reputation'] = self.reputation
         if self.phone_number:
             user_dict['phoneNumber'] = self.phone_number
         
@@ -210,6 +219,7 @@ class User:
                 gender=user_data.get('gender'),
                 address=user_data.get('address'),
                 phone_number=user_data.get('phoneNumber'),
+                reputation=user_data.get('reputation'),
                 created_at=user_data.get('createdAt'),
                 updated_at=user_data.get('updatedAt'),
                 _id=str(user_data['_id'])

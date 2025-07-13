@@ -9,6 +9,7 @@ from werkzeug.datastructures import FileStorage
 from functools import wraps
 
 from controllers.profile_controller import ProfileController
+from controllers.reputation_controller import ReputationController
 from .swagger_models import create_swagger_models
 
 # Crear namespace para perfil
@@ -158,5 +159,32 @@ def register_profile_api(api):
                 current_app.logger.error(f"Error uploading profile picture: {str(e)}")
                 return {'message': 'Error interno del servidor'}, 500
     
+    @profile_ns.route('/<string:user_id>/reputation')
+    class ReputationResource(Resource):
+        @profile_ns.doc(
+            'update_reputation',
+            description='Actualizar la reputación de un usuario',
+            security='Bearer',
+            params={'user_id': 'ID del usuario a actualizar'},
+            responses={
+                200: ('Reputación actualizada exitosamente', models['base_response']),
+                400: ('Payload inválido o ID de usuario inválido', models['error_response']),
+                401: ('Token inválido o expirado', models['error_response']),
+                404: ('Usuario no encontrado', models['error_response'])
+            }
+        )
+        @profile_ns.expect(models['reputation_update'], validate=True)
+        @profile_ns.marshal_with(models['base_response'], code=200)
+        @swagger_jwt_required
+        def patch(self, current_user_id, user_id):
+            """Actualizar la reputación de un usuario"""
+            try:
+                data = request.get_json()
+                reputation_delta = data.get('reputation_delta')
+                return ReputationController.update_reputation(user_id, reputation_delta)
+            except Exception as e:
+                current_app.logger.error(f"Error updating user reputation: {str(e)}")
+                return {'message': 'Error interno del servidor'}, 500
+
     # Registrar namespace
     api.add_namespace(profile_ns)

@@ -7,7 +7,9 @@ from flask_limiter.util import get_remote_address
 import jwt
 from functools import wraps
 from controllers.profile_controller import ProfileController
+from controllers.reputation_controller import ReputationController
 import os
+from utils.serialization import serialize_response
 
 # Crear blueprint para rutas de perfil
 profile_bp = Blueprint('profile', __name__)
@@ -169,5 +171,43 @@ def upload_profile_picture(current_user_id):
     except Exception as e:
         return jsonify({
             'message': 'Error subiendo foto de perfil',
+            'error': str(e)
+        }), 500
+
+@profile_bp.route('/<user_id_to_update>/reputation', methods=['PATCH'])
+@token_required
+def update_user_reputation(current_user_id,user_id_to_update):
+    """
+    Actualizar la reputación de un usuario.
+    Solo un administrador o el propio usuario puede actualizar su reputación.
+    
+    Headers:
+        Authorization: Bearer <jwt_token>
+    
+    Expected JSON:
+    {
+        "reputation_delta": 5
+    }
+    """
+    try:
+        token = request.headers.get('Authorization')
+        print(f"🆔 Token recibido: {token}")
+        request_data = request.get_json()
+        if not request_data or 'reputation_delta' not in request_data:
+            return jsonify({'message': 'Payload inválido. Se espera {"reputation_delta": int}'}), 400
+
+        reputation_delta = request_data['reputation_delta']
+        if not isinstance(reputation_delta, int):
+            return jsonify({'message': 'reputation_delta debe ser un entero'}), 400
+        
+        print(f"Updating reputation for user {user_id_to_update} by {reputation_delta}")
+        response_data, status_code = ReputationController.update_reputation(user_id_to_update, reputation_delta)
+        print(f"🆗 Reputación actualizada: {response_data}, status code {status_code}")
+        return response_data, status_code
+
+    except Exception as e:
+        print(f"❌ Error al actualizar la reputación: {str(e)}")
+        return jsonify({
+            'message': 'Error actualizando la reputación',
             'error': str(e)
         }), 500
