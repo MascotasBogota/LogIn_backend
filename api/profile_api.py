@@ -186,5 +186,26 @@ def register_profile_api(api):
                 current_app.logger.error(f"Error updating user reputation: {str(e)}")
                 return {'message': 'Error interno del servidor'}, 500
 
+    @profile_ns.route('/user/<string:user_id>')
+    @profile_ns.doc(params={'user_id': 'ID del usuario a consultar'})
+    class UserBasicInfoResource(Resource):
+        @profile_ns.doc(
+            'get_user_basic_info',
+            description='Obtener información básica de un usuario por ID',
+            responses={
+                200: ('Información básica del usuario obtenida exitosamente', models['user_basic_info_response']),
+                404: ('Usuario no encontrado', models['error_response']),
+                500: ('Error interno del servidor', models['error_response'])
+            }
+        )
+        @profile_ns.marshal_with(models['user_basic_info_response'], code=200)
+        def get(self, user_id):
+            """Obtener información básica de un usuario por ID"""
+            try:
+                return profile_controller.get_user_basic_info(user_id)
+            except Exception as e:
+                current_app.logger.error(f"Error getting user basic info: {str(e)}")
+                return {'message': 'Error interno del servidor'}, 500
+
     # Registrar namespace
     api.add_namespace(profile_ns)

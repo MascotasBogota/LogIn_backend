@@ -303,6 +303,73 @@ class TestProfileController:
             assert status_code == 404
             assert 'Usuario no encontrado' in result['message']
     
+    @pytest.mark.skipif(not IMPORT_SUCCESS, reason="No se pudo importar ProfileController")
+    def test_get_user_basic_info_success(self):
+        """Test obtener información básica del usuario exitosamente"""
+        user_id = 'mock_user_id'
+        
+        # Mock del modelo User
+        with patch('controllers.profile_controller.User') as mock_user_class:
+            mock_user = Mock()
+            mock_user._id = user_id
+            mock_user.email = 'test@example.com'
+            mock_user.full_name = 'Test User'
+            mock_user.username = 'testuser'
+            mock_user.profile_picture = '/static/uploads/profile.jpg'
+            mock_user.reputation = 100
+            
+            mock_user_class.find_by_id.return_value = mock_user
+            
+            result, status_code = ProfileController.get_user_basic_info(user_id)
+            
+            assert status_code == 200
+            assert result['message'] == 'Información del usuario obtenida exitosamente'
+            assert 'user' in result
+            assert result['user']['id'] == user_id
+            assert result['user']['full_name'] == 'Test User'
+            assert result['user']['username'] == 'testuser'
+            assert result['user']['email'] == 'test@example.com'
+            assert result['user']['profile_picture'] == '/static/uploads/profile.jpg'
+            assert result['user']['reputation'] == 100
+    
+    @pytest.mark.skipif(not IMPORT_SUCCESS, reason="No se pudo importar ProfileController")
+    def test_get_user_basic_info_not_found(self):
+        """Test obtener información básica de usuario que no existe"""
+        user_id = 'nonexistent_user_id'
+        
+        # Mock del modelo User
+        with patch('controllers.profile_controller.User') as mock_user_class:
+            mock_user_class.find_by_id.return_value = None
+            
+            result, status_code = ProfileController.get_user_basic_info(user_id)
+            
+            assert status_code == 404
+            assert 'Usuario no encontrado' in result['message']
+    
+    @pytest.mark.skipif(not IMPORT_SUCCESS, reason="No se pudo importar ProfileController")
+    def test_get_user_basic_info_with_null_values(self):
+        """Test obtener información básica con valores null"""
+        user_id = 'mock_user_id'
+        
+        # Mock del modelo User con valores null
+        with patch('controllers.profile_controller.User') as mock_user_class:
+            mock_user = Mock()
+            mock_user._id = user_id
+            mock_user.email = 'test@example.com'
+            mock_user.full_name = 'Test User'
+            mock_user.username = None
+            mock_user.profile_picture = None
+            mock_user.reputation = None
+            
+            mock_user_class.find_by_id.return_value = mock_user
+            
+            result, status_code = ProfileController.get_user_basic_info(user_id)
+            
+            assert status_code == 200
+            assert result['user']['username'] is None
+            assert result['user']['profile_picture'] is None
+            assert result['user']['reputation'] == 0  # Debe ser 0 cuando es None
+    
     def test_basic_import(self):
         """Test básico para verificar que al menos podemos hacer tests"""
         assert True
@@ -311,6 +378,7 @@ class TestProfileController:
             assert hasattr(ProfileController, 'get_profile')
             assert hasattr(ProfileController, 'update_profile')
             assert hasattr(ProfileController, 'change_password')
+            assert hasattr(ProfileController, 'get_user_basic_info')  # Nuevo método
             assert hasattr(ReputationController, 'update_reputation')
         else:
             pytest.skip("ProfileController o ReputationController no se pudo importar, pero el framework de tests funciona")

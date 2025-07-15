@@ -318,6 +318,47 @@ class ProfileController:
             }, 500
     
     @staticmethod
+    def get_user_basic_info(user_id):
+        """
+        Obtener información básica del usuario por ID
+        
+        Args:
+            user_id (str): ID del usuario
+            
+        Returns:
+            tuple: (response_data, status_code)
+        """
+        try:
+            print(f'📋 Obteniendo información básica para usuario: {user_id}')
+            
+            # Buscar usuario por ID
+            user = User.find_by_id(user_id)
+            
+            if not user:
+                return {'message': 'Usuario no encontrado'}, 404
+            
+            # Retornar solo los campos solicitados
+            user_basic_info = {
+                'id': str(user._id),
+                'full_name': user.full_name,
+                'username': user.username,
+                'email': user.email,
+                'profile_picture': user.profile_picture,
+                'reputation': user.reputation if user.reputation else 0
+            }
+            
+            print(f'✅ Información básica obtenida para: {user.email}')
+            
+            return {
+                'message': 'Información del usuario obtenida exitosamente',
+                'user': user_basic_info
+            }, 200
+            
+        except Exception as e:
+            print(f'❌ Error obteniendo información básica del usuario: {str(e)}')
+            return {'message': 'Error interno del servidor'}, 500
+
+    @staticmethod
     def _validate_profile_data(data, current_user):
         """
         Validar datos del perfil
