@@ -113,7 +113,7 @@ def update_profile(current_user_id):
             'error': str(e)
         }), 500
 
-@profile_bp.route('/change-password', methods=['POST'])
+@profile_bp.route('/change-password', methods=['PUT'])
 @token_required
 def change_password(current_user_id):
     """
@@ -209,5 +209,36 @@ def update_user_reputation(current_user_id,user_id_to_update):
         print(f"❌ Error al actualizar la reputación: {str(e)}")
         return jsonify({
             'message': 'Error actualizando la reputación',
+            'error': str(e)
+        }), 500
+
+@profile_bp.route('/user/<user_id>', methods=['GET'])
+def get_user_basic_info(user_id):
+    """
+    Obtener información básica de un usuario por ID
+    
+    URL Parameters:
+        user_id: ID del usuario a consultar
+    
+    Response:
+    {
+        "message": "Información del usuario obtenida exitosamente",
+        "user": {
+            "id": "user_id",
+            "full_name": "Juan Pérez",
+            "username": "juanperez",
+            "email": "juan@ejemplo.com",
+            "profile_picture": "/static/uploads/profile.jpg",
+            "reputation": 150
+        }
+    }
+    """
+    try:
+        response_data, status_code = ProfileController.get_user_basic_info(user_id)
+        return jsonify(response_data), status_code
+        
+    except Exception as e:
+        return jsonify({
+            'message': 'Error obteniendo información del usuario',
             'error': str(e)
         }), 500

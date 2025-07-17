@@ -11,7 +11,14 @@ from routes.user_routes import user_bp
 from routes.password_reset_routes import password_reset_bp
 from routes.profile_routes import profile_bp
 from api import create_api
-from utils.telemetry import init_telemetry
+
+# Importar telemetría de forma opcional
+try:
+    from utils.telemetry import init_telemetry
+    TELEMETRY_AVAILABLE = True
+except ImportError:
+    TELEMETRY_AVAILABLE = False
+    print("⚠️  OpenTelemetry no disponible - continuando sin telemetría")
 
 # Cargar variables de entorno
 load_dotenv()
@@ -82,7 +89,11 @@ def create_app():
 if __name__ == '__main__':
     app = create_app()
     port = int(os.getenv('PORT', 5000))
-    init_telemetry(app)  # Inicializar telemetría
+    
+    # Inicializar telemetría solo si está disponible
+    if TELEMETRY_AVAILABLE:
+        init_telemetry(app)
+        print("📊 Telemetría inicializada")
     
     print(f'🚀 Server running on port {port}')
     print(f'📡 API available at: http://localhost:{port}/api')
