@@ -3,6 +3,7 @@ Controlador para manejo de usuarios
 """
 import bcrypt
 import jwt
+import os
 from datetime import datetime, timedelta
 from flask import current_app, jsonify
 from models.user import User
@@ -102,10 +103,13 @@ class UserController:
                 return {'message': 'Credenciales inválidas'}, 400
             
             # Crear el token JWT
-            secret_key = current_app.config['SECRET_KEY']
+            secret_key = os.getenv('JWT_SECRET', 'mascotas_secret_key')  # Usar JWT_SECRET directamente
             payload = {
-                'userId': str(user._id),
-                'exp': datetime.utcnow() + timedelta(days=30)
+                'sub': str(user._id),  # Usar 'sub' (subject) estándar JWT
+                'userId': str(user._id),  # Mantener por compatibilidad
+                'exp': datetime.utcnow() + timedelta(days=30),
+                'iat': datetime.utcnow(),  # Issued at
+                'type': 'access'  # Tipo de token
             }
             
             token = jwt.encode(payload, secret_key, algorithm='HS256')
