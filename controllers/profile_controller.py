@@ -153,6 +153,8 @@ class ProfileController:
                     updated_fields.append('phoneNumber')
                 else:
                     return {'message': 'Número de teléfono inválido'}, 400
+        
+            user.reputation = request_data.get('reputation', user.reputation)  # Permitir actualizar reputación si se envía
             
             # Actualizar timestamp
             user.updated_at = datetime.utcnow()
