@@ -569,7 +569,7 @@ We acknowledge that this academic project, while functional and comprehensive, r
 
 ---
 
-*This technical post was collaboratively written by [Team Member Names] as part of our Software Engineering 2 course at Universidad Nacional de Colombia. The complete source code and documentation are available in our GitHub repositories.*
+*This technical post was collaboratively written by Patitas Bogota Team as part of our Software Engineering 2 course at Universidad Nacional de Colombia. The complete source code and documentation are available in our GitHub repositories.*
 
 **LinkedIn:** [https://www.linkedin.com/in/dcifuentesg/] [https://www.linkedin.com/in/martin-moreno-jara-250977242/] [https://www.linkedin.com/in/keynes-stephens-watson-844550288/] [https://www.linkedin.com/in/luis-felipe-tolosa-sierra-4441a2267/] [https://www.linkedin.com/in/juan-david-ardila-diaz-676a05290/] [https://www.linkedin.com/in/juan-huertaszz/]
 **GitHub Organization:** [https://github.com/MascotasBogota]  
