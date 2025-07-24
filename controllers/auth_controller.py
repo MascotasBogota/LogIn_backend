@@ -1,6 +1,7 @@
 """
 Controlador de autenticación que integra UserController y PasswordResetController
 """
+import os
 from .user_controller import UserController
 from .password_reset_controller import PasswordResetController
 from google.oauth2 import id_token
@@ -138,10 +139,13 @@ class AuthController:
                     return {'message': str(e)}, 409
             
             # Generate JWT for the user
-            secret_key = current_app.config['SECRET_KEY']
+            secret_key = os.getenv('JWT_SECRET', 'mascotas_secret_key')  # Usar JWT_SECRET directamente
             payload = {
-                'userId': str(user._id),
-                'exp': datetime.utcnow() + timedelta(days=30) # Standard token expiration
+                'sub': str(user._id),  # Usar 'sub' (subject) estándar JWT
+                'userId': str(user._id),  # Mantener por compatibilidad
+                'exp': datetime.utcnow() + timedelta(days=30), # Standard token expiration
+                'iat': datetime.utcnow(),  # Issued at
+                'type': 'access'  # Tipo de token
             }
             app_token = jwt.encode(payload, secret_key, algorithm='HS256')
             

@@ -77,6 +77,21 @@ def create_swagger_models(api):
         'profile': fields.Nested(user_info, description='Información del perfil')
     })
     
+    # Modelo para información básica del usuario
+    user_basic_info = api.model('UserBasicInfo', {
+        'id': fields.String(description='ID único del usuario', example='64f7b1c2d4e5f6a7b8c9d0e1'),
+        'full_name': fields.String(description='Nombre completo', example='Juan Carlos Pérez'),
+        'username': fields.String(description='Nombre de usuario', example='juanperez'),
+        'email': fields.String(description='Correo electrónico', example='juan@ejemplo.com'),
+        'profile_picture': fields.String(description='URL de la foto de perfil', example='/static/uploads/profile_pictures/user_123.jpg'),
+        'reputation': fields.Integer(description='Reputación del usuario', example=0)
+    })
+    
+    user_basic_info_response = api.model('UserBasicInfoResponse', {
+        'message': fields.String(description='Mensaje de respuesta'),
+        'user': fields.Nested(user_basic_info, description='Información básica del usuario')
+    })
+    
     profile_update = api.model('ProfileUpdate', {
         'full_name': fields.String(description='Nombre completo (mín. 2 caracteres)', example='Juan Carlos Pérez'),
         'username': fields.String(description='Nombre de usuario (3-20 caracteres, alfanumérico + _)', example='juanperez'),
@@ -171,6 +186,8 @@ def create_swagger_models(api):
         'user_info': user_info,
         'user_response': user_response,
         'profile_response': profile_response,
+        'user_basic_info': user_basic_info,
+        'user_basic_info_response': user_basic_info_response,
         'profile_update': profile_update,
         'profile_update_response': profile_update_response,
         'password_change': password_change,
