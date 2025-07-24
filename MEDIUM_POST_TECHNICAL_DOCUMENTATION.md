@@ -563,7 +563,7 @@ We acknowledge that this academic project, while functional and comprehensive, r
 - Tools: Docker, Pytest, Git/GitHub, Swagger
 - Deployment: Local development with Docker containerization
 
-**Project Timeline:** 12 weeks, 3 prototypes, 4 team members
+**Project Timeline:** 12 weeks, 3 prototypes, 6 team members
 
 **Final Note:** This project demonstrates our commitment to learning modern software engineering practices and our capability to deliver functional software solutions under academic constraints. We look forward to applying these skills in professional development environments.
 
