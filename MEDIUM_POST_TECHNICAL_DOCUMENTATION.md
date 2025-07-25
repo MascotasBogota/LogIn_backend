@@ -79,7 +79,7 @@ architectural integrity.
 
 A careful process of thought was put into the planning of this project. First,
 identifying the functional requirements and then grouping them into the modules
-that would be developed in each prototype. In the planning phase, we organized
+that would be developed in each increment. In the planning phase, we organized
 these increments in epics and user stories, which were then prioritized based on
 their importance to the project. The epics we defined, alongside some of their
 functional requirements, are as follows:
@@ -314,7 +314,7 @@ development cycles, we had to adapt the development process to fit the academic
 schedule. As a result, the development takes up two out of the three prototypes,
 with the first prototype being the planning phase.
 
-#### Prototype 1: Planning (Weeks 1-4)
+#### Prototype 1: Planning (Weeks 1-2)
 
 **Objectives:** Define project scope, user stories, and technical
 
@@ -335,7 +335,7 @@ with the first prototype being the planning phase.
 scope of the project, the features to be implemented, and the technical
 requirements.
 
-#### Prototype 2: MVP (Weeks 5-8)
+#### Prototype 2: MVP (Weeks 3-8)
 
 **Objectives:** User management and lost pet reporting system
 
@@ -400,6 +400,12 @@ Some of these changes were:
   and responses module. Thus, we decided to focus on the notification system
   instead, which was a more valuable feature to be implemented in a different
   repository.
+- **Adjustment of the development timeline:** As previously mentioned, we had to
+  adapt the development process to fit the academic schedule, which meant
+  merging the first and second increments into one, and also adjusting the time
+  we had planned for each one of them. Thus, the two 4-week increments were
+  merged into one big 6-week increment. This required us to prioritize important
+  features and be as efficient as possible.
 
 ### 3.2 Project Management Strategies
 
@@ -412,24 +418,30 @@ We implemented a Git flow strategy with distinct branches:
 - `feature/*`: Individual feature development
 - `fix/*`: Bug fixes and hotfixes
 
-#### Quality Assurance
-
-Each prototype included:
-
-- Code reviews for all pull requests
-- Automated testing with minimum 70% coverage
-- Manual testing protocols
-- Performance benchmarking
-
 ---
 
-## 4. Technical Implementation Details
+## 5. Technical Implementation Details
 
-### 4.1 Authentication and Security
+Each module was developed as an independent service, and in a different
+repository inside the team's GitHub organization. The modules we developed are
+the following:
 
-#### JWT Implementation
+### 5.1 User management module
 
-Our authentication system uses Flask-JWT-Extended for secure token management:
+A detailed explanation of the user management module can be found in
+[the module's repository](https://github.com/MascotasBogota/LogIn_backend.git).
+This module is responsible for user authentication, profile management, and
+password recovery. It uses Flask-JWT-Extended for secure token management and
+bcrypt for password hashing, ensuring secure user authentication. The module
+also includes password reset functionality and profile management, allowing
+users to update their personal information and upload profile pictures.
+
+#### Authentication and Security with JWT implementation
+
+Our authentication system uses Flask-JWT-Extended for secure token management.
+These tokens are then used throughout the application to authenticate user
+requests. The following code snippet demonstrates the login endpoint, which
+generates a JWT token upon successful authentication:
 
 ```python
 from flask_jwt_extended import create_access_token, jwt_required
@@ -460,7 +472,231 @@ def login():
 - Input validation and sanitization
 - SQL injection prevention through parameterized queries
 
-### 4.2 Frontend Architecture
+### 5.2 Reports and Responses Module
+
+A detailed explanation of the reports and responses module can be found in
+[the module's repository](https://github.com/MascotasBogota/2-Reportes-Respuestas.git).
+This module is responsible for managing lost and found pet reports, including
+creating, updating, and deleting reports, as well as filtering them by pet type
+and location. It also includes a response system for users to interact with
+reports, such as marking a report as solved or providing additional information.
+The module uses MongoDB for data storage and Flask-RESTX for API development,
+ensuring a robust and scalable solution.
+
+The code snippets below illustrate the implementation of the report creation and
+response:
+
+**report creation**
+
+```python
+def create_report(data, user_id):
+    try:
+        return Report(
+            user_id=user_id,
+            pet_name=data['pet_name'],
+            type=data['type'],
+            description=data['description'],
+            location=data['location'],
+            images=data.get('images', [])
+        ).save()
+    except (ValidationError, KeyError, TypeError) as e:
+        raise ValueError("Validation Error: " + str(e))
+```
+
+**Filter reports**
+
+```python
+def get_filtered_reports(report_type=None, location=None, radius=None):
+    query = Q()
+
+    if report_type:
+        query &= Q(type=report_type)
+
+    if location and radius:
+        # MongoDB expects GeoJSON [long, lat]
+        query &= Q(location__geo_within_center=[location, radius / 111000])  # metros a grados
+
+    return Report.objects(query, status="open")
+```
+
+**Create Report**
+
+```python
+def create_response_service(report_id: str, data: dict, user_id: str) -> dict:
+
+    try:
+        report = Report.objects.get(id=report_id)
+    except DoesNotExist:
+        raise ServiceError('Report not found')
+    if report.status != 'open':
+        raise ServiceError('Cannot add responses to a closed report')
+
+    # Forzar imagen para hallazgos
+    if data['type'] == 'hallazgo' and not data.get('images'):
+        raise ServiceError('Findings must include at least one image')
+    resp = Response(
+        report_id=report_id,
+        resp_user_id=user_id,
+        type=data['type'],
+        comment=data['comment'],
+        images=data.get('images', []),  # Lista de URLs de imágenes opcional
+        location=data.get('location')
+    )
+    resp.save()
+
+    return resp
+```
+
+**Image uploading**
+
+```python
+def handle_image_upload(file, user_id):
+    is_valid, error = validate_file(file)
+    if not is_valid:
+        return False, error
+
+    success, result = process_and_save_image(file, user_id)
+    return success, result
+```
+
+The image uploading functionality goes much more in depth than this, as it
+includes the connection to the Supabase storage service, the image processing
+and resizing, and the generation of public URLs for the images. For more
+information on this functionality, please refer to the module's repository.
+
+### 5.3 Notifications Module
+
+A detailed explanation of the notifications module can be found in
+[the module's repository](https://github.com/MascotasBogota/Notification.git).
+This module generates real-time notifications for report owners when their
+reports are updated, such as when a response is added. It integrates with the
+report and responses module to listen for changes in the reports and send
+notifications to the users involved.
+
+The following code snippet illustrates the notification creation process:
+
+```python
+def create_notification(self, report_id: str, response_id: str, response_data: Dict) -> Notification:
+        try:
+
+            report_owner_id = self._get_report_owner(report_id)
+
+            notification_type = response_data.get('type', 'avistamiento')
+            title = f"Nuevo {notification_type}"
+            message = f"Se ha registrado un nuevo {notification_type} para tu reporte de mascota perdida"
+
+            notification = Notification(
+                user_id=report_owner_id,
+                report_id=report_id,
+                response_id=response_id,
+                notification_type=notification_type,
+                title=title,
+                message=message,
+                sighting_description=response_data.get('comment'),
+                sighting_location=response_data.get('location'),
+                sighting_images=response_data.get('images', []),
+                sighting_time=response_data.get('created_at', datetime.utcnow())
+            )
+
+            notification.save()
+            return notification
+
+        except Exception as e:
+            raise NotificationServiceError(f"Error al crear notificación: {str(e)}")
+```
+
+This code snippet shows how the notification is created when a new response is
+added to a report. It retrieves the report owner's ID, constructs the
+notification message, and saves it to the database.
+
+### 5.4 User Reputation Module
+
+A detailed explanation of the user reputation module can be found in
+[the module's repository](https://github.com/MascotasBogota/4-UserReputation.git).
+This module implements a user reputation system that rewards users for helpful
+contributions and penalizes unhelpful ones. It tracks user interactions with
+reports and responses, updating their reputation score based on their actions.
+Namely, if a user responds to a report in a helpful way, a counter in their
+profile is incremented, while if they respond in an unhelpful way, the counter
+is decremented. This system encourages positive community engagement and helps
+identify reliable users.
+
+It is integrated with both the user management and reports and responses modules
+to track user interactions and update reputation scores accordingly. The
+following code snippet illustrates how the reputation score is updated based on
+user actions:
+
+```python
+def rate_response(self,report_id:str,response_id: str, rating: str, user_id: str,token:str):
+        # 1. Get response details to validate owner
+        response_details = report_service_client.get_response_details(report_id,response_id)
+        if not response_details:
+            raise ConnectionError("❌ Could not connect to Report Service.")
+
+        report_details = report_service_client.get_report_details(report_id)
+        if not report_details:
+            raise ConnectionError("❌ Could not connect to Report Service for report details.")
+
+        if report_details.get("user_id") != user_id:
+            raise PermissionError("❌ User is not the owner of the report.")
+
+        response_type = response_details.get("type")
+        author_id = response_details.get("resp_user_id")
+        current_response_reviewed = response_details.get("reviewed")
+        current_status = response_details.get("is_useful")  #
+
+        # 2. Calculate reputation change
+        delta = 0
+        is_useful = False
+        response_reviewed = False
+
+        if response_type == "avistamiento":
+            if rating == "useful":
+                if current_response_reviewed is True and current_status is True:
+                    raise ValueError("❌ This sighting has already been marked as useful.")
+                delta = SIGHTING_USEFUL
+                is_useful = True
+            elif rating == "not_useful":
+                if current_status is False:
+                    raise ValueError("❌ A sighting that has not been previously marked as useful cannot be marked as not useful.")
+                delta = SIGHTING_REMOVE
+                is_useful = False
+            else:
+                raise ValueError("❌ Invalid rating for sighting. Only 'useful' or 'not_useful' are allowed.")
+
+        elif response_type == "hallazgo":
+            if rating == "useful":
+                if current_response_reviewed is True and current_status is True:
+                    raise ValueError("❌ this finding has already been marked as useful.")
+                delta = FINDING_USEFUL
+                is_useful = True
+            elif rating == "false_finding":
+                if current_response_reviewed is True and current_status is False:
+                    raise ValueError("❌ this finding has already been marked as false.")
+                delta = FINDING_FALSE
+                is_useful = False
+            else:
+                raise ValueError("❌ Invalid rating for finding. Only 'useful' or 'false_finding' are allowed.")
+        else:
+            raise ValueError("❌ Invalid response type.")
+
+        response_reviewed = True
+        # 3. Update user reputation
+        update_result = user_service_client.update_user_reputation(author_id, delta,token)
+        if not update_result:
+            raise ConnectionError("❌ Could not update user reputation.")
+
+        # 4. Mark response as rated
+        status_result = report_service_client.update_response_status(report_id,response_id,response_reviewed, is_useful,token)
+        if not status_result:
+            # Note: This could lead to an inconsistent state. A rollback or retry mechanism might be needed here.
+            raise ConnectionError("❌ Could not update response status.")
+        resObject = {"status": "success","resp_auth":author_id ,"new_reputation": update_result.get("reputation"), "response":status_result}
+
+        return resObject
+```
+
+### 5.5 Frontend Architecture
 
 #### Component Structure
 
@@ -511,141 +747,122 @@ export const AuthProvider = ({ children }) => {
 };
 ```
 
-### 4.3 Backend Service Architecture
+### 5.6 Observability and Monitoring integration
 
-#### Modular Service Design
-
-Our Flask backend follows a modular architecture with clear separation:
-
-```python
-# Service Layer Pattern
-class ReportService:
-    @staticmethod
-    def create_report(user_id, report_data):
-        try:
-            # Validate input data
-            validator = ReportValidator(report_data)
-            if not validator.is_valid():
-                return None, validator.errors
-
-            # Process images
-            image_paths = ImageService.process_uploads(
-                report_data.get('images', [])
-            )
-
-            # Create report document
-            report = {
-                'user_id': ObjectId(user_id),
-                'type': report_data['type'],
-                'pet_info': report_data['pet_info'],
-                'location': report_data['location'],
-                'images': image_paths,
-                'status': 'active',
-                'created_at': datetime.utcnow()
-            }
-
-            result = mongo.db.reports.insert_one(report)
-
-            # Send notifications
-            NotificationService.notify_nearby_users(
-                report['location'],
-                report_data['type']
-            )
-
-            return str(result.inserted_id), None
-
-        except Exception as e:
-            logger.error(f"Error creating report: {str(e)}")
-            return None, ['Internal server error']
-```
-
-### 4.4 Database Operations and Optimization
-
-#### MongoDB Optimization Strategies
-
-- Indexed commonly queried fields (location, timestamp, status)
-- Implemented aggregation pipelines for complex queries
-- Used connection pooling for improved performance
+A global monitoring solution was integrated to track application performance. To
+achieve this, we used OpenTelemetry to instrument our services, allowing us to
+collect metrics and traces. These metrics are then sent to Prometheus for
+storage and analysis, and visualized in Grafana dashboards. But in order to
+accomplish this we had to make a few changes in each module. Namely, we had to
+install the necessary dependencies and add a piece of code to initialize
+telemetry and expose a `metrics/` endpoint. The following code snippet
+illustrates how we initialized the telemetry in each of the modules:
 
 ```python
-# Geospatial Query Example
-def find_nearby_reports(latitude, longitude, radius_km=10):
-    return mongo.db.reports.find({
-        'location.coordinates': {
-            '$near': {
-                '$geometry': {
-                    'type': 'Point',
-                    'coordinates': [longitude, latitude]
-                },
-                '$maxDistance': radius_km * 1000  # Convert to meters
-            }
-        },
-        'status': 'active'
-    })
+from opentelemetry import metrics
+from opentelemetry.sdk.metrics import MeterProvider
+from opentelemetry.instrumentation.flask import FlaskInstrumentor
+from prometheus_client import Counter, Histogram, generate_latest, REGISTRY
+from flask import request
+import time
+
+REQUEST_COUNT = Counter(
+    'http_requests_total',
+    'Total number of HTTP requests',
+    ['method', 'endpoint']
+)
+
+REQUEST_LATENCY = Histogram(
+    'http_request_duration_seconds',
+    'HTTP request latency in seconds',
+    ['method', 'endpoint'],
+    buckets=[0.1, 0.5, 1.0, 2.0, 5.0]
+)
+
+ERROR_COUNT = Counter(
+    'http_errors_total',
+    'Total number of HTTP errors',
+    ['method', 'endpoint', 'status_code']
+)
+
+def init_telemetry(app):
+    FlaskInstrumentor().instrument_app(app)
+
+    @app.before_request
+    def before_request():
+        request._start_time = time.time()
+        REQUEST_COUNT.labels(
+            method=request.method,
+            endpoint=str(request.endpoint or 'none')
+        ).inc()
+
+    @app.after_request
+    def after_request(response):
+        latency = time.time() - request._start_time
+        REQUEST_LATENCY.labels(
+            method=request.method,
+            endpoint=str(request.endpoint or 'none')
+        ).observe(latency)
+
+        if response.status_code >= 400:
+            ERROR_COUNT.labels(
+                method=request.method,
+                endpoint=str(request.endpoint or 'none'),
+                status_code=str(response.status_code)
+            ).inc()
+
+        return response
+
+    @app.route("/metrics")
+    def metrics():
+        return generate_latest(REGISTRY), 200, {'Content-Type': 'text/plain; version=0.0.4'}
 ```
 
----
+Later, the prometheus service had to be configured to scrape the metrics from
+each module's `/metrics` endpoint. This was done by cofiguring the
+`prometheus.yml` file, and then establishing both prometheus and grafana
+services in the docker-compose file. The following code snippet illustrates how
+we configured the `prometheus.yml` file:
 
-## 5. Key Features and Functionality
+```yaml
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
 
-### 5.1 User Authentication and Profile Management
+scrape_configs:
+  - job_name: "user-reputation-service"
+    static_configs:
+      - targets: ["user-reputation-service:5100"] # Asumiendo que el servicio corre en el puerto 5100
+    metrics_path: "/metrics"
 
-Our authentication system provides:
+  - job_name: "reports-responses-service"
+    static_configs:
+      - targets: ["report-service:5050"] # Asumiendo que el servicio corre en el puerto 5100
+    metrics_path: "/metrics"
 
-- Secure user registration with email verification
-- JWT-based session management
-- Profile customization with image uploads
-- Password reset functionality
+  - job_name: "user-service"
+    static_configs:
+      - targets: ["login-service:5000"] # Asumiendo que el servicio corre en el puerto 5100
+    metrics_path: "/metrics"
 
-### 5.2 Pet Management System
+  - job_name: "notification-service"
+    static_configs:
+      - targets: ["notification-service:5010"] # Asumiendo que el servicio corre en el puerto 5100
+    metrics_path: "/metrics"
+```
 
-The pet management module enables users to:
+With this configuration, the prometheus service runs in port 9090 and is
+consumed by the grafana service at port 3000. Then, the metrics can be
+visualized in Grafana dashboards, allowing us to monitor the performance and
+health of our application in real-time.
 
-- Create detailed pet profiles with photos
-- Track medical records and vaccination schedules
-- Manage multiple pets per user account
-- Export pet information for veterinary visits
-
-### 5.3 Lost and Found Pet Reporting
-
-This core feature includes:
-
-- Geolocation-based reporting system
-- Image upload with automatic resizing
-- Real-time notifications to nearby users
-- Advanced search and filtering capabilities
-- Status tracking (active, resolved, expired)
-
-### 5.4 Educational Content Management
-
-Our educational module provides:
-
-- Categorized pet care information
-- Interactive tips with importance ratings
-- Responsive design with smooth animations
-- Community-contributed content support
-
-### 5.5 Notification System
-
-The notification service offers:
-
-- Real-time alerts for nearby lost pets
-- Email notifications for report updates
-- Customizable notification preferences
-- Integration with multiple communication channels
-
----
-
-## 6. Testing and Quality Assurance
-
-### 6.1 Testing Strategy
+### 5.7 Testing
 
 Our comprehensive testing approach included:
 
-#### Unit Testing
+#### 5.7.1 Unit Testing
 
 - Backend: 85% code coverage using Pytest
-- Frontend: Component testing with React Testing Library
 - Isolated testing of service functions
 
 ```python
@@ -674,32 +891,28 @@ def test_create_report_success():
     assert mongo.db.reports.find_one({'_id': ObjectId(report_id)})
 ```
 
-#### Integration Testing
+#### 5.7.2 Integration Testing
+
+As part of our integration testing, we created a dedicated module that
+integrates all the services and verifies their correct operation. This module
+tests the complete request/response cycles between the frontend and backend
+services, ensuring that all components work together as expected. The
+integration tests , both for backend and frontend, cover:
 
 - API endpoint testing with complete request/response cycles
 - Database integration testing
 - Authentication flow testing
 
-#### User Acceptance Testing
+The testing module is accessible in the
+[integration testing repository](https://github.com/MascotasBogota/Test-Integracion.git)
 
-- Manual testing scenarios for all user workflows
-- Cross-browser compatibility testing
-- Mobile responsiveness verification
+We used Pytest for backend integration tests, ensuring all services communicate
+correctly, while for frontend integration tests, we user playwright to simulate
+user interactions and verify UI behavior.
 
-### 6.2 Performance Optimization
+## 6. Challenges and Solutions
 
-We implemented several performance enhancements:
-
-- Image optimization and lazy loading
-- MongoDB query optimization with indexes
-- Frontend code splitting and bundle optimization
-- Caching strategies for frequently accessed data
-
----
-
-## 7. Challenges and Solutions
-
-### 7.1 Technical Challenges
+### 6.1 Technical Challenges
 
 #### Challenge 1: Real-time Notifications
 
@@ -708,15 +921,16 @@ We implemented several performance enhancements:
 
 #### Challenge 2: Image Upload and Storage
 
-**Problem:** Handling large image files and storage optimization **Solution:**
-Implemented automatic image resizing and organized file storage structure
+**Problem:** Handling locally uploaded images with size and format constraints
+**Solution:** Used Supabase storage for scalable image hosting and URL
+generation
 
 #### Challenge 3: Geolocation Accuracy
 
 **Problem:** Ensuring accurate location-based pet matching **Solution:**
 Implemented radius-based search with user-configurable distance parameters
 
-### 7.2 Project Management Challenges
+### 6.2 Project Management Challenges
 
 #### Challenge 1: Feature Scope Management
 
@@ -729,7 +943,7 @@ Implemented radius-based search with user-configurable distance parameters
 **Solution:** Established coding standards, mandatory code reviews, and
 automated testing
 
-### 7.3 Learning Outcomes
+### 6.3 Learning Outcomes
 
 This project provided valuable experience in:
 
@@ -742,19 +956,17 @@ This project provided valuable experience in:
 
 ---
 
-## 8. Results and Impact
+## 7. Results and Impact
 
-### 8.1 Technical Achievements
+### 7.1 Technical Achievements
 
 - **Complete Full-Stack Application:** Successfully developed and deployed a
   functioning web application
 - **Scalable Architecture:** Implemented modular design supporting future
   enhancements
 - **Comprehensive Testing:** Achieved high test coverage ensuring reliability
-- **Performance Optimization:** Optimized for fast loading and responsive user
-  experience
 
-### 8.2 Functional Completeness
+### 7.2 Functional Completeness
 
 Our final system successfully delivers:
 
@@ -762,14 +974,7 @@ Our final system successfully delivers:
 - Complete pet management lifecycle
 - Efficient lost pet reporting and recovery system
 - Educational content with engaging user interface
-- Notification system with multiple channels
-
-### 8.3 Code Metrics
-
-- **Backend:** 12 API endpoints, 95% test coverage
-- **Frontend:** 25+ React components, responsive design
-- **Database:** 4 main collections with optimized queries
-- **Documentation:** Comprehensive API documentation via Swagger
+- Notification system
 
 ---
 
@@ -827,9 +1032,9 @@ This project showcased our ability to:
 - Deliver a functional, tested, and documented software system
 - Manage project timelines and scope effectively
 
-The experience gained through this academic project has prepared us for
-professional software development challenges and highlighted the importance of
-systematic approaches to complex software problems.
+The experience gained through this academic project is yet another step that has
+prepared us for professional software development challenges and highlighted the
+importance of systematic approaches to complex software problems.
 
 We acknowledge that this academic project, while functional and comprehensive,
 represents a learning exercise and would benefit from additional refinement and
@@ -839,20 +1044,7 @@ project management capabilities.
 
 ---
 
-**Technical Stack Summary:**
-
-- Frontend: React 18, Vite, CSS Modules, React Router
-- Backend: Flask 2.3, Flask-RESTX, Flask-JWT-Extended
-- Database: MongoDB with geospatial indexing
-- Tools: Docker, Pytest, Git/GitHub, Swagger
-- Deployment: Local development with Docker containerization
-
 **Project Timeline:** 12 weeks, 3 prototypes, 6 team members
-
-**Final Note:** This project demonstrates our commitment to learning modern
-software engineering practices and our capability to deliver functional software
-solutions under academic constraints. We look forward to applying these skills
-in professional development environments.
 
 ---
 
@@ -861,13 +1053,15 @@ of our Software Engineering 2 course at Universidad Nacional de Colombia. The
 complete source code and documentation are available in our GitHub
 repositories._
 
-**LinkedIn:** [https://www.linkedin.com/in/dcifuentesg/]
-[https://www.linkedin.com/in/martin-moreno-jara-250977242/]
-[https://www.linkedin.com/in/keynes-stephens-watson-844550288/]
-[https://www.linkedin.com/in/luis-felipe-tolosa-sierra-4441a2267/]
-[https://www.linkedin.com/in/juan-david-ardila-diaz-676a05290/]
-[https://www.linkedin.com/in/juan-huertaszz/] **GitHub Organization:**
-[https://github.com/MascotasBogota]  
-**Medium Publication Date:** [July 24th, 2025 ]
+**LinkedIn:**
+[Martin Moreno Jara](https://www.linkedin.com/in/martin-moreno-jara-250977242/),
+[Juan Esteban Cardenas Huertas](https://www.linkedin.com/in/juan-huertaszz/),
+[Juan David Ardila Diaz](https://www.linkedin.com/in/luis-felipe-tolosa-sierra-4441a2267/),[Luis Felipe Tolosa Sierra](https://www.linkedin.com/in/luis-felipe-tolosa-sierra-4441a2267/),
+[David Alejandro Cifuentes Gonzalez](https://www.linkedin.com/in/dcifuentesg/),
+[Keynes Stephens Watson](https://www.linkedin.com/in/keynes-stephens-watson-844550288/)
+
+**GitHub Organization:** [MascotasBogotaOrg](https://github.com/MascotasBogota)
+
+**Medium Publication Date:** [July 25th, 2025 ]
 
 ---
