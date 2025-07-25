@@ -151,28 +151,79 @@ consumes the backend services through REST APIs. Though this architectural style
 is not so widely used in real life applications, due to the academic nature of
 the project, we decided to use it in order to learn and practice good software
 engineering practices, such as modularity, separation of concerns, and
-scalability, aiming to prepare ourselves for a future in software development.
+scalability.
+
+### 3.2 Modular Design and components
+
+![Application architecture](final%20components.png)
+
+The diagram shows the components of the application architecture in their
+entirety, as well as the relationships between them. As indicated previously, a
+SOFEA approach was implemented, under which the different proposed modules were
+developed as REST APIs and integrated through the Front End to deliver the
+application. However, communication between services could not be limited to
+integration with the Front End, as some services depend on others to function
+and make requests to each other to perform their tasks (this is denoted in the
+diagram by the dotted arrows). Subsequently, to properly develop some
+functionalities, it was necessary to use third-party services, which were
+implemented through their APIs and development tools in Flask.
+
+#### 3.2.1 Module segmentation and components
+
+The final version of the application includes the following modules:
+
+##### Front End (React):
+
+- Main frontend component
+- Educational module
+
+###### Backend services (APIs developed in Flask):
+
+- User management module
+- Reports and responses module
+- Notifications module
+- User reputation module
+
+###### Database (MongoDB hosted on Atlas):
+
+- User database
+- Reports and responses database
+
+###### Third-party services:
+
+- Observability: Open Telemetry, Prometheus, Grafana
+- Image storage: Supabase storage
+- Mail service: Email sender
+
+Additionally, the integration testing module groups all the previous modules to
+verify the application's correct operation.
+
+#### 3.2.2 Component explanation
+
+The backbone of the application is the user management and reports and responses
+modules. Each module has its own database, which can only be accessed (written
+or queried) through these modules and not through external modules, in order to
+implement best practices. The user management module uses the Email Sender
+service to send emails to Gmail domains for the password reset functionality.
+Meanwhile, the reports and responses module uses supabase storage, a cloud
+storage service, to store pet images that users can upload in reports and
+responses. Initially, this functionality was managed by saving the images
+locally, but it was decided to change this due to its infeasibility. Thus, when
+images are uploaded, a public URL is generated to load them on the front end.
+
+Both the notifications service and the user reputation service depend on the two
+aforementioned services, as they must use their functionalities or access their
+databases. All backend service modules were then configured to display metrics
+that show the performance and error of each service. Open Telemetry was used in
+conjunction with Prometheus to obtain observability information, which is then
+displayed in Grafana.
+
+All services connect to the Front End, which handles user requests and
+interactions with the system, following the aforementioned SOFEA architectural
+style. Finally, the integration testing module integrates the entire application
+to ensure stable operation and consistent communication between all modules.
 
 ## 2. Technical Architecture and Design Decisions
-
-### 2.1 System Architecture Overview
-
-Our system follows a microservices-inspired architecture with clear separation
-of concerns:
-
-```
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   React SPA     │    │  Flask Backend  │    │   MongoDB       │
-│   (Frontend)    │◄──►│   Services      │◄──►│   Database      │
-│                 │    │                 │    │                 │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-         │                       │                       │
-         │                       │                       │
-    ┌─────────┐           ┌─────────────┐         ┌─────────────┐
-    │   UI    │           │    JWT      │         │  Document   │
-    │ Router  │           │    Auth     │         │   Store     │
-    └─────────┘           └─────────────┘         └─────────────┘
-```
 
 ### 2.2 Technology Stack Justification
 
