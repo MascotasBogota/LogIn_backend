@@ -2,9 +2,12 @@
 
 _An Academic Software Engineering Project - Universidad Nacional de Colombia_
 
-**Authors:** [Martin Moreno Jara](), [Juan Esteban Cardenas Huertas](),
-[Juan David Ardila Diaz](),[Luis Felipe Tolosa Sierra](),
-[David Alejandro Cifuentes Gonzalez](), [Keynes Stephens Watson]()
+**Authors:**
+[Martin Moreno Jara](https://www.linkedin.com/in/martin-moreno-jara-250977242/),
+[Juan Esteban Cardenas Huertas](https://www.linkedin.com/in/juan-huertaszz/),
+[Juan David Ardila Diaz](https://www.linkedin.com/in/luis-felipe-tolosa-sierra-4441a2267/),[Luis Felipe Tolosa Sierra](https://www.linkedin.com/in/luis-felipe-tolosa-sierra-4441a2267/),
+[David Alejandro Cifuentes Gonzalez](https://www.linkedin.com/in/dcifuentesg/),
+[Keynes Stephens Watson](https://www.linkedin.com/in/keynes-stephens-watson-844550288/)
 
 ---
 
@@ -54,6 +57,19 @@ This project was developed following iterative and incremental methodologies,
 with three distinct prototypes spanning 4 months of development. Each iteration
 focused on expanding functionality while maintaining code quality and
 architectural integrity.
+
+### 1.4 Project Goals achieved
+
+1. **User Authentication and Authorization:** Implemented secure user login and
+   registration, as well as useful feature such as password recovery and profile
+   management.
+2. **Lost Pet Reporting System:** Developed a comprehensive system for reporting
+   lost pets, including location and images.
+3. **Community Engagement:** Fostered a sense of community through user profiles
+   and interaction, and through the user reputation system, which rewards
+   helpful contributions and penalizes unhelpful ones.
+4. **Scalable Architecture:** Designed a flexible decoupled architecture to
+   accommodate future features, integrating microservices for modularity.
 
 ---
 
@@ -125,6 +141,7 @@ integrity:
     },
     "pets": ["ObjectId references"]
   },
+
   "reports": {
     "_id": "ObjectId",
     "type": "lost|found",
@@ -142,6 +159,7 @@ integrity:
     "status": "active|resolved|expired",
     "timestamp": "ISO Date"
   }
+
 }
 ```
 
@@ -171,27 +189,27 @@ Our development followed a structured three-prototype methodology:
 
 #### Prototype 2: Core Features (Weeks 5-8)
 
-**Objectives:** Pet management and reporting system
+**Objectives:** Lost pet reporting and response system
 
-- Pet profile creation and management
-- Lost/found pet reporting system
+- Integration with user management module
+- Pet loss report creation and management
+- Response system for reports
 - Image upload and storage
-- Basic notification system
 
 **Key Achievements:**
 
 - File upload service with image processing
+- Advanced search and filtering of reports
 - Geolocation integration for pet reports
-- Email notification system
 - Advanced form validation
 
 #### Prototype 3: Integration and Enhancement (Weeks 9-12)
 
 **Objectives:** System integration and user experience optimization
 
+- Reputation system for users
+- Notification system for report updates
 - Educational content management
-- Advanced search and filtering
-- Real-time notifications
 - Performance optimization
 
 **Key Achievements:**
