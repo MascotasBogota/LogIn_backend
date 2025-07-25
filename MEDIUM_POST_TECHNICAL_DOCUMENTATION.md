@@ -256,46 +256,14 @@ to ensure stable operation and consistent communication between all modules.
 - **Docker:** Containerization for consistent deployment environments
 - **Pytest:** Comprehensive testing framework for backend services
 
-### 2.3 Database Design
+#### Version Control Workflow
 
-Our MongoDB schema leverages document flexibility while maintaining data
-integrity:
+We implemented a Git flow strategy with distinct branches:
 
-```json
-{
-  "users": {
-    "_id": "ObjectId",
-    "email": "string",
-    "password": "hashed_string",
-    "profile": {
-      "firstName": "string",
-      "lastName": "string",
-      "phone": "string",
-      "address": "string"
-    },
-    "pets": ["ObjectId references"]
-  },
-
-  "reports": {
-    "_id": "ObjectId",
-    "type": "lost|found",
-    "petInfo": {
-      "name": "string",
-      "species": "string",
-      "breed": "string",
-      "description": "string"
-    },
-    "location": {
-      "coordinates": [longitude, latitude],
-      "description": "string"
-    },
-    "images": ["string paths"],
-    "status": "active|resolved|expired",
-    "timestamp": "ISO Date"
-  }
-
-}
-```
+- `main`: Production-ready code
+- `develop`: Integration branch for features
+- `feature/*`: Individual feature development
+- `fix/*`: Bug fixes and hotfixes
 
 ---
 
@@ -406,19 +374,6 @@ Some of these changes were:
   we had planned for each one of them. Thus, the two 4-week increments were
   merged into one big 6-week increment. This required us to prioritize important
   features and be as efficient as possible.
-
-### 3.2 Project Management Strategies
-
-#### Version Control Workflow
-
-We implemented a Git flow strategy with distinct branches:
-
-- `main`: Production-ready code
-- `develop`: Integration branch for features
-- `feature/*`: Individual feature development
-- `fix/*`: Bug fixes and hotfixes
-
----
 
 ## 5. Technical Implementation Details
 
