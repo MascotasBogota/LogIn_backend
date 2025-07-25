@@ -103,30 +103,35 @@ functional requirements, are as follows:
 
 Once we defined the epics and functional requirements, we created a roadmap to
 guide the development process. The roadmap was divided into three main
-prototypes, each with its own set of features and objectives.Each prototype was
+increments, each with its own set of features and objectives. Each increment was
 planned to be developed in a 4-week sprint. The roadmap is as follows:
 
-1. **Prototype 1: MVP. User Management, Reporting and responses** The main goal
-   of this prototype was to establish the foundation of the application,
+1. **Increment 1: MVP. User Management, Reporting and responses** The main goal
+   of this increment was to establish the foundation of the application,
    delivering the core functionalities of the application in order to accomplish
-   the MVP. The main features of this prototype were:
+   the MVP. The main features of this increment were:
    - User registration and login system
    - Basic profile management
    - Report creation and management
    - Response system for reports
-1. **Prototype 2: Notification and Reputation System** The main goal of this
-   prototype was to enhance user engagement and trust within the platform. The
-   main features of this prototype were:
+1. **Increment 2: Notification and Reputation System** The main goal of this
+   increment was to enhance user engagement and trust within the platform. The
+   main features of this increment were:
    - Notification system for report updates
    - User reputation system implementation
-1. **Prototype 3: Educational Content and Final Enhancements** The main goal of
-   this prototype was to provide users with valuable information and resources
+1. **Increment 3: Educational Content and Final Enhancements** The main goal of
+   this increment was to provide users with valuable information and resources
    related to pet care, as well as improving already developed features of the
-   application. The main features of this prototype were:
+   application. The main features of this increment were:
    - Educational content management
    - Performance optimization
    - Final enhancements and bug fixes
    - Observability and monitoring implementation
+
+However, due to time constraints, we had to adapt the development process to
+only two iterations, as the planning phase took up the first one. Thus, the
+first and second increments were merged into one, and the third increment was
+developed as the final version of the application.
 
 #### 2.1.3 Team management
 
@@ -223,9 +228,7 @@ interactions with the system, following the aforementioned SOFEA architectural
 style. Finally, the integration testing module integrates the entire application
 to ensure stable operation and consistent communication between all modules.
 
-## 2. Technical Architecture and Design Decisions
-
-### 2.2 Technology Stack Justification
+### 3.3 Technology Stack Justification
 
 #### Frontend Technologies
 
@@ -296,59 +299,107 @@ integrity:
 
 ---
 
-## 3. Development Methodology and Project Management
+## 4. Functional increments and system evolution
 
-### 3.1 Iterative Development Approach
+### 4.1 Iterative Development Approach
 
-Our development followed a structured three-prototype methodology:
+For this class' deliverables, we adopted an iterative development approach,
+dividing the project into three main prototypes, each building upon the previous
+one. These prototypes include both the planning phase and the development,
+allowing us to gradually implement features and improve the system based on
+feedback and testing.
 
-#### Prototype 1: Foundation (Weeks 1-4)
+Due to time constraints, though we had planned to develop the project in three
+development cycles, we had to adapt the development process to fit the academic
+schedule. As a result, the development takes up two out of the three prototypes,
+with the first prototype being the planning phase.
 
-**Objectives:** Core authentication and basic user management
+#### Prototype 1: Planning (Weeks 1-4)
 
-- User registration and login system
-- Basic profile management
-- Database schema design
-- Initial React component structure
+**Objectives:** Define project scope, user stories, and technical
+
+- Identify core features and user needs
+- Establish technical stack and architecture
+- Create initial wireframes and UI designs
+- Set up development environment and version control
+- Define project milestones and deliverables
 
 **Key Achievements:**
 
-- Secure JWT authentication implementation
-- MongoDB integration with user collections
-- Responsive UI framework establishment
-- Development environment standardization
+- Completed requirement analysis
+- Defined user stories and acceptance criteria
+- Established project architecture and technology stack
+- Set up GitHub organization and repository
 
-#### Prototype 2: Core Features (Weeks 5-8)
+**Justification:** Before starting the development, we needed to define the
+scope of the project, the features to be implemented, and the technical
+requirements.
 
-**Objectives:** Lost pet reporting and response system
+#### Prototype 2: MVP (Weeks 5-8)
 
-- Integration with user management module
-- Pet loss report creation and management
-- Response system for reports
+**Objectives:** User management and lost pet reporting system
+
+- Implement user authentication and profile management
+- Develop lost pet reporting system
+- Create response system for lost pet reports
 - Image upload and storage
 
 **Key Achievements:**
 
-- File upload service with image processing
-- Advanced search and filtering of reports
-- Geolocation integration for pet reports
-- Advanced form validation
+- User registration and login system with JWT authentication
+- Basic profile management with image upload
+- Lost pet report creation and management
+- Search and filtering of reports
+- Response system for reports with image upload and
 
-#### Prototype 3: Integration and Enhancement (Weeks 9-12)
+**Justification:** The main goal of this prototype was to deliver a functional,
+yet unfinished, version of the application that could be used to test the core
+functionalities of the system, following the MVP (Minimum Viable Product)
+approach.
 
-**Objectives:** System integration and user experience optimization
+#### Prototype 3: Final Version (Weeks 9-12)
 
-- Reputation system for users
-- Notification system for report updates
-- Educational content management
-- Performance optimization
+**Objectives:** Notification system, user reputation, and educational content
+
+- Implement notification system for report updates
+- Develop user reputation system based on report interactions
+- Create educational content
+- Improving the services developed in the previous prototypes
+- Observability and monitoring implementation
+- Integration testing module
 
 **Key Achievements:**
 
-- Complete educational module with categorized content
-- Enhanced notification system with real-time updates
-- Improved responsive design
-- Comprehensive testing suite
+- Notification system for real-time updates on reports
+- User reputation system to encourage community engagement
+- Educational content management with categorized articles
+- Performance optimization and bug fixes
+- Integration testing for all components
+- Observability and monitoring with Open Telemetry, Prometheus, and
+
+**Justification:** The main goal of this prototype was to deliver a complete
+version of the application, with all the features implemented and tested, as
+well as to improve the already developed features. This prototype also included
+the implementation of observability and monitoring tools to ensure the system's
+stability and performance.
+
+### 4.2 Changes and insights
+
+Even though we did a careful and detailed planning of the project, we had to do
+some changes mid way through the development process because there were things
+we did not foresee or that we did not take into account in the planning phase.
+Some of these changes were:
+
+- **Image storage:** Initially, we planned to store images locally, but we
+  realized that this was not feasible due to the size of the images and the need
+  for scalability. Thus, we decided to use Supabase storage, a cloud storage
+  service, to store the images and generate public URLs for them.
+- **Notification or Filters:** Initially, we had planned to implement a filter
+  service for the reports, but we realized that this was not necessary as the
+  search and filtering functionalities were already implemented in the reports
+  and responses module. Thus, we decided to focus on the notification system
+  instead, which was a more valuable feature to be implemented in a different
+  repository.
 
 ### 3.2 Project Management Strategies
 
