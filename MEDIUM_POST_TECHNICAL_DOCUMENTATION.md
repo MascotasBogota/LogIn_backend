@@ -73,6 +73,86 @@ architectural integrity.
 
 ---
 
+## 2. Planning structure and methodology
+
+### 2.1 Project Planning
+
+A careful process of thought was put into the planning of this project. First,
+identifying the functional requirements and then grouping them into the modules
+that would be developed in each prototype. In the planning phase, we organized
+these increments in epics and user stories, which were then prioritized based on
+their importance to the project. The epics we defined, alongside some of their
+functional requirements, are as follows:
+
+#### 2.1.1 Epics and Functional Requirements
+
+- **User Management:** Authentication, profile management, password recovery.
+- **Lost Pet Reporting:** Create, filter, and manage lost pet reports, upload
+  pet images, select last known location of the pet and marking the report as
+  solved.
+- **Responses to reports:** Create and manage different types of responses to
+  lost pet reports, including sightings and findings.
+- **Notification System:** Implement a notification system for users to receive
+  updates on lost pet reports.
+- **User Reputation System:** Develop a user reputation system to encourage
+  community engagement and reward helpful contributions.
+- **Educational Content:** Create and manage educational content related to pet
+  care, including articles, tips, and resources.
+
+#### 2.1.2 Roadmap
+
+Once we defined the epics and functional requirements, we created a roadmap to
+guide the development process. The roadmap was divided into three main
+prototypes, each with its own set of features and objectives.Each prototype was
+planned to be developed in a 4-week sprint. The roadmap is as follows:
+
+1. **Prototype 1: MVP. User Management, Reporting and responses** The main goal
+   of this prototype was to establish the foundation of the application,
+   delivering the core functionalities of the application in order to accomplish
+   the MVP. The main features of this prototype were:
+   - User registration and login system
+   - Basic profile management
+   - Report creation and management
+   - Response system for reports
+1. **Prototype 2: Notification and Reputation System** The main goal of this
+   prototype was to enhance user engagement and trust within the platform. The
+   main features of this prototype were:
+   - Notification system for report updates
+   - User reputation system implementation
+1. **Prototype 3: Educational Content and Final Enhancements** The main goal of
+   this prototype was to provide users with valuable information and resources
+   related to pet care, as well as improving already developed features of the
+   application. The main features of this prototype were:
+   - Educational content management
+   - Performance optimization
+   - Final enhancements and bug fixes
+   - Observability and monitoring implementation
+
+#### 2.1.3 Team management
+
+The project was developed by a team of 6 members, each with specific roles and
+responsibilities. While we did not implement a formal agile methodology such as
+Scrum, due to the difficulty of coordinating all necessary meetings, we did
+follow some agile principles such as iterative development and continuous
+feedback, as well as assertive communication. We divided the team into smaller
+2-men groups, each responsible for specific tasks and features. This allowed us
+to work in parallel and deliver the project in a timely manner.
+
+---
+
+## 3. Design and Architecture
+
+### 3.1 Architecture Overview
+
+The architecture of the application is based on SOFEA (Service-Oriented Frontend
+Architecture), by which each backend service is developed in a separate
+repository, and the frontend is developed as a separate application that
+consumes the backend services through REST APIs. Though this architectural style
+is not so widely used in real life applications, due to the academic nature of
+the project, we decided to use it in order to learn and practice good software
+engineering practices, such as modularity, separation of concerns, and
+scalability, aiming to prepare ourselves for a future in software development.
+
 ## 2. Technical Architecture and Design Decisions
 
 ### 2.1 System Architecture Overview
